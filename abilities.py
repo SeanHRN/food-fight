@@ -13,7 +13,7 @@ if os.path.isfile("all_abilities.csv"):
         for row in reader_obj_abilities:
             ability_temp = {
                 "effect_function": row[1],
-                "description" : row[2]
+                "description"    : row[2]
             }
             abilities_dict[row[0]] = ability_temp
 

@@ -115,6 +115,7 @@ def do_battle(fighterA, fighterB):
     #
     while (fighterA["curr_hp"] > 0 and fighterB["curr_hp"] > 0):
 
+        print()
         check_round_start(fighterA, fighterB)
 
         moveA = ""
@@ -151,10 +152,10 @@ def do_battle(fighterA, fighterB):
             priority_b = 0
         goes_first = 'a'
 
-        print("priority_a: " + str(priority_a))
-        print("priority_b: " + str(priority_b))
-        print("speed_a: " + str(fighterA["speed"]))
-        print("speed_b: " + str(fighterB["speed"]))
+        #print("priority_a: " + str(priority_a))
+        #print("priority_b: " + str(priority_b))
+        #print("speed_a: " + str(fighterA["speed"]))
+        #print("speed_b: " + str(fighterB["speed"]))
         # Priority Check
         if priority_a < priority_b:
             goes_first = 'b'
