@@ -1,0 +1,204 @@
+import itertools
+import os.path
+import sys
+import csv
+from moves import Moves
+import abilities
+sys.path.append(os.getcwd())
+
+
+### Use the CSV to make the character dictionary
+move_control = Moves()
+roster = {}
+
+def test_character(fighter):
+    print(fighter["curr_hp"])
+    print(fighter["move_0"])
+
+def do_status_move(fighter, move):
+    if move == "protect":
+        fighter["state_protect"] = True
+
+def do_turn(user, move, target):
+    # By using check_round_middle,
+    # returns False: Target is not out of HP
+    # returns True:  Target is out of HP. The fight is over.
+    print()
+    print("--------------")
+    print(user["name"] + " used " + move.title() + "!")
+    print()
+
+    if not move in move_control.moves_dict:
+        print("\"" + move + "\"" + " was not found!")
+        return False
+
+    if move_control.moves_dict[move]["category"] == "status":
+        do_status_move(user, move)
+
+    #WIP: Basic attack with protect and multi-hit compatibility
+    elif move_control.moves_dict[move]["category"] != "status":
+
+        # Case 1
+        if target["state_protect"] is False:
+            for _ in itertools.repeat(None, move_control.moves_dict[move]["instances"]):
+                target["curr_hp"] -= move_control.calculate_attack_damage(move, user, target)
+                print("Hit landed!")
+                # If someone is out of HP, return true. If not, keep going.
+                if check_round_middle(user, target):
+                    return True
+        else:
+            print(target["name"] + " protected itself!")
+    return False
+
+def check_print_hp(fighterA, fighterB):
+    l = [fighterA, fighterB]
+    for fighter in l:
+        print(fighter["name"] + " HP: " + str(fighter["curr_hp"]))
+
+def check_print_status(fighterA, fighterB):
+    l = [fighterA, fighterB]
+    for fighter in l:
+        if fighter["status"]:
+            print("Status effect(s) on " + fighter["name"] + ": ", end="")
+            for s in fighter["status"]:
+                print(s)
+
+def check_round_start(fighterA, fighterB):
+    #print("check round start")
+    l = [fighterA, fighterB]
+    for fighter in l:
+        fighter["state_protect"] = False
+
+
+def check_ability(fighterA, fighterB):
+    l = [fighterA, fighterB]
+    for index,fighter in enumerate(l):
+        abilities.check_soup_burst(fighter, l[1-index])
+
+
+def check_round_middle(fighterA, fighterB):
+    check_print_hp(fighterA, fighterB)
+    check_ability(fighterA, fighterB)
+
+    if fighterA["curr_hp"] <= 0 or fighterB["curr_hp"] <= 0:
+        print("The fight is over.\n\n")
+
+    return fighterA["curr_hp"] <= 0 or fighterB["curr_hp"] <= 0
+
+def check_round_end(fighterA, fighterB):
+    check_print_status(fighterA, fighterB)
+
+def do_battle(fighterA, fighterB):
+    #
+    # Per round:
+    #     1. Check starting conditions.
+    #     2. Get move inputs. The user may use numbers 0-3 or the full name of the move.
+    #     3. Check who goes first based on priority and speed.
+    #     4. Do the first move.
+    #     5. Check the result.
+    #     6. Do the second move.
+    #     7. Check the result.
+    #
+    while (fighterA["curr_hp"] > 0 and fighterB["curr_hp"] > 0):
+
+        check_round_start(fighterA, fighterB)
+
+        moveA = ""
+        moveB = ""
+        while moveA not in fighterA["moves"]:
+            print("Choose Fighter 1 Move: ", end=" ")
+            for num, move in enumerate(fighterA["moves"]):
+                print(str(num) + ": " + move + "  ", end="")
+            moveA = input("\n")
+            if moveA.isdigit() and int(moveA) in range(4):
+                moveA = fighterA["moves"][int(moveA)]
+        fighterA["queued_move"] = moveA
+        print("moveA: " + moveA)
+        print()
+        while moveB not in fighterB["moves"]:
+            print("Choose Fighter 2 Move: ", end=" ")
+            for num, move in enumerate(fighterB["moves"]):
+                print(str(num) + ": " + move + "  ", end="")
+            moveB = input("\n")
+            if moveB.isdigit() and int(moveB) in range(4):
+                moveB = fighterB["moves"][int(moveB)]
+        fighterB["queued_move"] = moveB
+        print("moveB: " + moveB)
+
+        try:
+            priority_a = int(move_control.moves_dict[moveA]["priority"])
+        except KeyError:
+            print("Priority for " + moveA + " not found. Using default.")
+            priority_a = 0
+        try:
+            priority_b = int(move_control.moves_dict[moveB]["priority"])
+        except KeyError:
+            print("Priority for " + moveB + " not found. Using default.")
+            priority_b = 0
+        goes_first = 'a'
+
+        # Priority Check
+        if priority_a < priority_b:
+            goes_first = 'b'
+        elif fighterA["speed"] < fighterB["speed"]:
+            goes_first = 'b'
+
+        # Speed Check
+        if goes_first == 'a':
+            if not do_turn(fighterA, moveA, fighterB):
+                do_turn(fighterB, moveB, fighterA)
+        else:
+            if not do_turn(fighterB, moveB, fighterA):
+                do_turn(fighterA, moveA, fighterB)
+
+        #TODO: Decide how to use this if move 2 is getting its own checks.
+        check_round_end(fighterA, fighterB)
+
+
+BATTLE_CAN_HAPPEN = False
+if os.path.isfile("fighters.csv"):
+    with open("fighters.csv", newline='') as fighter_file:
+        reader_obj = csv.reader(fighter_file)
+
+        for row in reader_obj:
+            fighter_temp = {   # the id, row[0], is just the key.
+                "name" : row[1],
+                "trainer" : row[2],
+                "types" : row[3].split('/'),
+                "max_hp" : int(row[4]),
+                "phy_att" : int(row[5]),
+                "phy_def" : int(row[6]),
+                "spec_att" : int(row[7]),
+                "spec_def" : int(row[8]),
+                "speed" : int(row[9]),
+                "ability" : row[10],
+                "curr_hp" : int(row[4]),
+                "curr_stage_phy_att" : 0,
+                "curr_stage_phys_def" : 0,
+                "curr_stage_spec_att" : 0,
+                "curr_stage_spec_def" : 0,
+                "curr_stage_speed" : 0,
+                "state_protect" : False,
+                "state_ability_activated" : False,
+                "weight" : float(row[15]),
+                "status" : [],
+                "queued_move" : "blank"
+            }
+            fighter_temp["moves"] = [row[11], row[12], row[13], row[14]]
+            roster[row[0]] = fighter_temp
+        if reader_obj:
+                BATTLE_CAN_HAPPEN = True
+
+
+if BATTLE_CAN_HAPPEN:
+    char_a = roster["1"]
+    char_b = roster["3"]
+
+    print("\n\n--------------\n")
+
+    check_print_hp(char_a, char_b)
+    do_battle(char_a, char_b)
+    print(char_a["name"] + " HP: " + str(char_a["curr_hp"]))
+    print(char_b["name"] + " HP: " + str(char_b["curr_hp"]))
+
+    print("\n\n--------------\n")

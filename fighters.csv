@@ -1,0 +1,6 @@
+0,"Dummy","player_0","normal",0,0,0,0,0,0,"blank_ability","move0","move1","move2","move3",0.0
+1,"Rice Ninja","player_1","grass/dark",65,70,40,40,40,120,"blank_ability","leaf blade","sucker punch","rice shuriken","blank attack",25.0
+2,"Soup Dumpling","player_2","water/fire",110,120,70,40,100,90,"soup burst","protect","jet punch","heat crash","lunge",130.0
+3,"Dinuguanggal","player_3","dark/poison",40,40,40,120,100,130,"blank_ability","autotomize","scrape","toxic","move3",70.0
+560,"Scrafty","Sean","dark/fighting",65,90,115,45,115,58,"Moxie","dragon dance","ice punch","crunch","drain punch",30.0
+254,"Sceptile","Sean","grass",70,85,65,105,85,120,"Overgrow","leaf storm","giga drain","leaf blade","dragon pulse",115.0
