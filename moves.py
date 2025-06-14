@@ -94,15 +94,21 @@ class Moves:
                 move_function = getattr(specific_moves, move_function)
                 move_function(user)
                 return
+            else:
+                print("DEBUG: effect_function set to 'none'")
         except KeyError:
             print("Move not found!")
         return
 
     def ability_check_category_1(self, user, target, move, move_power):
-        ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
-        if ability_function != "none":
-            curr_ability_function = getattr(abilities, ability_function)
-            return curr_ability_function(user, target, move, move_power) # currently works just for technician
+
+        try:
+            ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
+            if ability_function != "none":
+                curr_ability_function = getattr(abilities, ability_function)
+                return curr_ability_function(user, target, move, move_power) # currently works just for technician
+        except KeyError:
+            return move_power
 
         return move_power
 
