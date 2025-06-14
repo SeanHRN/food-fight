@@ -25,67 +25,49 @@ dinu_moves_set = {"scrape()", "analyzed_impale()"}
 damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
 damage_multiplier_burn = 1/16
+
+abilities_dict = {}
+types_dict = {}
+
+if os.path.isfile("type_chart.csv"):
+    with open("type_chart.csv", newline='', encoding="UTF-8") as type_file:
+        reader_obj_types = csv.reader(type_file)
+        for row in reader_obj_types:
+            type_temp = {
+                "normal"   : row[1],
+                "fire"     : row[2],
+                "water"    : row[3],
+                "electric" : row[4],
+                "grass"    : row[5],
+                "ice"      : row[6],
+                "fighting" : row[7],
+                "poison"   : row[8],
+                "ground"   : row[9],
+                "flying"   : row[10],
+                "psychic"  : row[11],
+                "bug"      : row[12],
+                "rock"     : row[13],
+                "ghost"    : row[14],
+                "dragon"   : row[15],
+                "dark"     : row[16],
+                "steel"    : row[17],
+                "fairy"    : row[18],
+            }
+            types_dict[row[0]] = type_temp
+
+if os.path.isfile("all_abilities.csv"):
+    with open("all_abilities.csv", newline='', encoding="UTF-8") as type_file:
+        reader_obj_abilities = csv.reader(type_file)
+        for row in reader_obj_abilities:
+            ability_temp = {
+                "function": row[1],
+                "description" : row[2]
+            }
+            abilities_dict[row[0]] = ability_temp
+
 class Moves:
-    moves_dict = {}
-    abilities_dict = {}
-    types_dict = {}
-    def __init__(self):
-        if os.path.isfile("all_moves.csv"):
-            with open("all_moves.csv", newline='', encoding="UTF-8") as move_file:
-                reader_obj_moves = csv.reader(move_file)
-                for row in reader_obj_moves:
-                    move_temp = {
-                        "type"                     : row[1],
-                        "category"                 : row[2],
-                        "pp"                       : int(row[3]),
-                        "power"                    : int(row[4]),
-                        "accuracy"                 : int(row[5]),
-                        "priority"                 : int(row[6]),
-                        "instances"                : int(row[7]),
-                        "effect_function"          : row[8],
-                        "attr_makes_contact"       : bool(row[9]),
-                        "attr_affected_by_protect" : bool(row[10]),
-                        "description"              : row[11]
-                    }
-                    self.moves_dict[row[0]] = move_temp
-            #print(self.moves_dict)
 
-        if os.path.isfile("type_chart.csv"):
-            with open("type_chart.csv", newline='', encoding="UTF-8") as type_file:
-                reader_obj_types = csv.reader(type_file)
-                for row in reader_obj_types:
-                    type_temp = {
-                        "normal"   : row[1],
-                        "fire"     : row[2],
-                        "water"    : row[3],
-                        "electric" : row[4],
-                        "grass"    : row[5],
-                        "ice"      : row[6],
-                        "fighting" : row[7],
-                        "poison"   : row[8],
-                        "ground"   : row[9],
-                        "flying"   : row[10],
-                        "psychic"  : row[11],
-                        "bug"      : row[12],
-                        "rock"     : row[13],
-                        "ghost"    : row[14],
-                        "dragon"   : row[15],
-                        "dark"     : row[16],
-                        "steel"    : row[17],
-                        "fairy"    : row[18],
-                    }
-                    self.types_dict[row[0]] = type_temp
-                    #print(self.types_dict)
-
-        if os.path.isfile("all_abilities.csv"):
-            with open("all_abilities.csv", newline='', encoding="UTF-8") as type_file:
-                reader_obj_abilities = csv.reader(type_file)
-                for row in reader_obj_abilities:
-                    ability_temp = {
-                        "function": row[1],
-                        "description" : row[2]
-                    }
-                    self.abilities_dict[row[0]] = ability_temp
+    #def __init__(self):
 
     def change_stage_main_stat(self, target, stat, change):
         if target[stat] == 6 and change > 0:
@@ -103,7 +85,7 @@ class Moves:
     def type_interaction(self, move_type, target_type):
         # Returns pair: 0: Interaction Value, 1: Interaction Message
         try:
-            value = self.types_dict[move_type][target_type]
+            value = types_dict[move_type][target_type]
         except KeyError:
             value = 1
         message = ""
@@ -115,13 +97,23 @@ class Moves:
             message = "It had no effect."
         return value, message
 
+    def do_status_move(self, user, move):
+        try:
+            move_function = specific_moves.moves_dict[move]["effect_function"]
+            if move_function != "none":
+                move_function = getattr(specific_moves, move_function)
+                move_function(user)
+                return
+        except KeyError:
+            print("Move not found!")
+        return
 
     def calculate_interaction(self, move, user, target):
         damage = 0
-        move_power = self.moves_dict[move]["power"]
+        move_power = specific_moves.moves_dict[move]["power"]
 
         # Irregular Effect
-        move_function = self.moves_dict[move]["effect_function"]
+        move_function = specific_moves.moves_dict[move]["effect_function"]
 
         if move_function != "none":
             curr_irregular_move_function = getattr(specific_moves, move_function)
@@ -146,7 +138,7 @@ class Moves:
 
 
         # Offense and Defense Stats
-        if self.moves_dict[move]["category"] == "physical":
+        if specific_moves.moves_dict[move]["category"] == "physical":
             attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
             def_stat = target["phy_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_phy_def"])]
         else:
@@ -161,20 +153,18 @@ class Moves:
 
 
         # User Burned
-        if user["status"] == "burn" and self.moves_dict[move]["category"] == "physical":
+        if user["status"] == "burn" and specific_moves.moves_dict[move]["category"] == "physical":
             damage = damage * 0.5
             print("Damage reduced because " + user["name"] + " is burned!")
 
         #STAB
-        if self.moves_dict[move]["type"] in user["types"]:
+        if specific_moves.moves_dict[move]["type"] in user["types"]:
             damage = damage * 1.5
 
         # Type Effectiveness
         type_multiplier = 1.0
         for t in target["types"]:
-            #print("      type damage multiplier for " + t + ": " + self.types_dict[self.moves_dict[move]["type"]][t])
-            type_multiplier = type_multiplier * float(self.types_dict[self.moves_dict[move]["type"]][t])
-        #print("      total type multiplier: " + str(type_multiplier))
+            type_multiplier = type_multiplier * float(types_dict[specific_moves.moves_dict[move]["type"]][t])
         damage = damage * type_multiplier
 
         match type_multiplier:

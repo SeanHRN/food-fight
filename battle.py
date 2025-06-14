@@ -23,10 +23,6 @@ def test_character(fighter):
     print(fighter["curr_hp"])
     print(fighter["move_0"])
 
-def do_status_move(fighter, move):
-    if move == "protect":
-        fighter["state_protect"] = True
-
 def do_turn(user, move, target):
     # By using check_round_middle,
     # returns False: Target is not out of HP
@@ -36,22 +32,19 @@ def do_turn(user, move, target):
     print(user["name"] + " used " + case_change(move) + "!")
     print()
 
-    if not move in move_control.moves_dict:
+    if not move in moves.specific_moves.moves_dict:
         print("\"" + move + "\"" + " was not found!")
         return False
 
-    elif move_control.moves_dict[move]["category"] == "status":
-        do_status_move(user, move)
-
+    elif moves.specific_moves.moves_dict[move]["category"] == "status":
+        move_control.do_status_move(user, move)
 
     # Uses a loop so that multi-hit moves can work.
-    elif move_control.moves_dict[move]["category"] != "status":
+    elif moves.specific_moves.moves_dict[move]["category"] != "status":
         if target["state_protect"] is False:
-            for _ in itertools.repeat(None, move_control.moves_dict[move]["instances"]):
-                #target["curr_hp"] -= move_control.calculate_attack_damage(move, user, target)
+            for _ in itertools.repeat(None, moves.specific_moves.moves_dict[move]["instances"]):
                 move_control.calculate_interaction(move, user, target)
-                # If someone is out of HP, return true. If not, keep going.
-                if check_round_middle(user, target):
+                if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
                     return True
         else:
             print(target["name"] + " protected itself!")
@@ -147,12 +140,12 @@ def do_battle(fighterA, fighterB):
         print("[   " + case_change(moveB) + "   ]")
 
         try:
-            priority_a = int(move_control.moves_dict[moveA]["priority"])
+            priority_a = int(moves.specific_moves.moves_dict[moveA]["priority"])
         except KeyError:
             print("Priority for " + case_change(moveA) + " not found. Using default.")
             priority_a = 0
         try:
-            priority_b = int(move_control.moves_dict[moveB]["priority"])
+            priority_b = int(moves.specific_moves.moves_dict[moveB]["priority"])
         except KeyError:
             print("Priority for " + case_change(moveB) + " not found. Using default.")
             priority_b = 0
