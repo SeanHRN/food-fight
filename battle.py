@@ -193,7 +193,7 @@ if os.path.isfile("fighters.csv"):
                 "spec_att" : int(row[7]),
                 "spec_def" : int(row[8]),
                 "speed" : int(row[9]),
-                "ability" : row[10],
+                "ability" : row[10].lower(),
                 "curr_stage_phy_att" : 0,
                 "curr_stage_phy_def" : 0,
                 "curr_stage_spec_att" : 0,

@@ -1,1 +1,2 @@
-"soup burst","check_soup_burst()","When the Pokemon's health drops below 50%, it shoots soup, sharply lowering its stats and scaling the opponent."
+"soup burst","check_soup_burst","When the Pokemon's health drops below 50%, it shoots soup, sharply lowering its stats and scaling the opponent."
+"technician","check_technician","Powers up weak moves so the Pokémon can deal more damage with them."

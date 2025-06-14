@@ -1,6 +1,7 @@
 import csv
 import os.path
 import specific_moves
+import abilities
 
 stage_multiplier_main_stats_dict = {
     -6: 2/8,
@@ -26,7 +27,6 @@ damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
 damage_multiplier_burn = 1/16
 
-abilities_dict = {}
 types_dict = {}
 
 if os.path.isfile("type_chart.csv"):
@@ -54,16 +54,6 @@ if os.path.isfile("type_chart.csv"):
                 "fairy"    : row[18],
             }
             types_dict[row[0]] = type_temp
-
-if os.path.isfile("all_abilities.csv"):
-    with open("all_abilities.csv", newline='', encoding="UTF-8") as type_file:
-        reader_obj_abilities = csv.reader(type_file)
-        for row in reader_obj_abilities:
-            ability_temp = {
-                "function": row[1],
-                "description" : row[2]
-            }
-            abilities_dict[row[0]] = ability_temp
 
 class Moves:
 
@@ -108,6 +98,14 @@ class Moves:
             print("Move not found!")
         return
 
+    def ability_check_category_1(self, user, target, move, move_power):
+        ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
+        if ability_function != "none":
+            curr_ability_function = getattr(abilities, ability_function)
+            return curr_ability_function(user, target, move, move_power) # currently works just for technician
+
+        return move_power
+
     def calculate_interaction(self, move, user, target):
         damage = 0
         move_power = specific_moves.moves_dict[move]["power"]
@@ -119,7 +117,8 @@ class Moves:
             curr_irregular_move_function = getattr(specific_moves, move_function)
             result = curr_irregular_move_function(user, target)
             # Tuple Code System
-            # [0]: 0: Failure, 1: Missed, 2: Success (Regular Interaction) 3: Success (Halt calculate_interaction() Immediately)
+            # [0]: 0: Failure, 1: Missed, 2: Success (Regular Interaction)
+            #      3: Success OR Failed via Ability Resolve (Halt calculate_interaction() Immediately)
             # [1]: Irregular damage to apply
             # [2]: 0: The return value is a damage addition. 1: The return value is a damage multiplier.
             if result[0] == 0:
@@ -135,6 +134,9 @@ class Moves:
                     move_power *= result[1]
             else: # result[0] == 3
                 return
+
+        # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
+        move_power = self.ability_check_category_1(user, target, move, move_power)
 
 
         # Offense and Defense Stats

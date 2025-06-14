@@ -70,13 +70,26 @@ def print_stat_level_change(target, stats, levels): # levels before the change, 
                 print(target["name"] + "'s " + s  + " severely fell!")
 
 
-def print_status_effect(target,status, already):
+def print_status_effect(target, status, already):
     if not already:
         print(target["name"] + " is " + status + "ed!")
     else:
         print(target["name"] + " is already " + status + "ed!")
 
+
+def print_ability_protect(user):
+    print(user["name"] + " is protected by " + user["ability"].title() + "!")
+
 ### Attack/Contact Moves ###
+
+def move_acid_spray(user, target):
+    if accuracy_check():
+        if target["ability"] == "bulletproof":
+            print_ability_protect(target)
+            return [3,0,0]
+        target["curr_stage_spec_def"] -= 2
+        return [2,0,0]
+    return [1,0,0]
 
 def move_crunch(user, target):
     if accuracy_check():
