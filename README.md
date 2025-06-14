@@ -36,9 +36,7 @@ Play it in the terminal!
 
 
 ## How To Play ##
-<br>
 Run battle.py
-
 `python battle.py`
 or
 `py battle.py`
