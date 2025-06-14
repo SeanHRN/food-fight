@@ -40,6 +40,7 @@ Play it in the terminal!
 Run battle.py
 
     python battle.py
-
+<br>
 or
+<br>
     py battle.py
