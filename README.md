@@ -39,8 +39,6 @@ Play it in the terminal!
 <br>
 Run battle.py
 
-    python battle.py
-<br>
+`python battle.py`
 or
-<br>
-    py battle.py
+`py battle.py`
