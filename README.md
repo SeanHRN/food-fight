@@ -33,3 +33,13 @@ Play it in the terminal!
 - Add held items
 - Add system to specify EVs (currently at 0 for all)
 - Make accuracy check do things other than return True
+
+
+## How To Play ##
+<br>
+Run battle.py
+
+    python battle.py
+
+or
+    py battle.py
