@@ -20,6 +20,7 @@ stage_multiplier_main_stats_dict = {
 
 major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
 minor_status_set = {"confuse", "infatuate"}
+dinu_moves_set = {"scrape()", "analyzed_impale()"}
 
 damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
@@ -114,25 +115,34 @@ class Moves:
             message = "It had no effect."
         return value, message
 
-    def calculate_attack_damage(self, move, user, target):
+
+    def calculate_interaction(self, move, user, target):
+        damage = 0
         move_power = self.moves_dict[move]["power"]
 
         # Irregular Effect
         move_function = self.moves_dict[move]["effect_function"]
-        #print("move function:" + move_function)
+
         if move_function != "none":
-            if move_function == "move_heat_crash()":
-                move_power = specific_moves.move_heat_crash(user, target)
-            elif move_function == "move_sucker_punch()":
-                result = specific_moves.move_sucker_punch(target)
-                if not result:
-                    print("Sucker Punch failed!")
-                    return 0
-            elif move_function == "move_scrape()":
-                specific_moves.move_scrape(user, target)
-                return 0
-            elif move_function == "move_analyzed_impale()":
-                move_power = specific_moves.move_analyzed_impale(self.moves_dict["analyzed_impale()"]["power"], user, target)
+            curr_irregular_move_function = getattr(specific_moves, move_function)
+            result = curr_irregular_move_function(user, target)
+            # Tuple Code System
+            # [0]: 0: Failure, 1: Missed, 2: Success (Regular Interaction) 3: Success (Halt calculate_interaction() Immediately)
+            # [1]: Irregular damage to apply
+            # [2]: 0: The return value is a damage addition. 1: The return value is a damage multiplier.
+            if result[0] == 0:
+                print("It failed!")
+                return
+            elif result[0] == 1:
+                print("It missed!")
+                return
+            elif result[0] == 2:
+                if result[2] == 0:
+                    move_power += result[1]
+                elif result[2] == 1:
+                    move_power *= result[1]
+            else: # result[0] == 3
+                return
 
 
         # Offense and Defense Stats
@@ -175,4 +185,5 @@ class Moves:
             case 0:
                 print("It had no effect!")
 
-        return int(damage)
+
+        target["curr_hp"] -= int(damage)

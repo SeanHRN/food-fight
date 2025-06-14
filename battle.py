@@ -1,5 +1,6 @@
 import itertools
 import os.path
+import random
 import sys
 import csv
 from moves import Moves
@@ -11,6 +12,12 @@ sys.path.append(os.getcwd())
 ### Use the CSV to make the character dictionary
 move_control = Moves()
 roster = {}
+
+def case_change(move):
+    if move in moves.dinu_moves_set:
+        return move
+    else:
+        return move.title()
 
 def test_character(fighter):
     print(fighter["curr_hp"])
@@ -26,7 +33,7 @@ def do_turn(user, move, target):
     # returns True:  Target is out of HP. The fight is over.
     print()
     print("--------------")
-    print(user["name"] + " used " + move.title() + "!")
+    print(user["name"] + " used " + case_change(move) + "!")
     print()
 
     if not move in move_control.moves_dict:
@@ -36,14 +43,13 @@ def do_turn(user, move, target):
     elif move_control.moves_dict[move]["category"] == "status":
         do_status_move(user, move)
 
-    #WIP: Basic attack with protect and multi-hit compatibility
 
+    # Uses a loop so that multi-hit moves can work.
     elif move_control.moves_dict[move]["category"] != "status":
-        # Case 1
         if target["state_protect"] is False:
             for _ in itertools.repeat(None, move_control.moves_dict[move]["instances"]):
-                target["curr_hp"] -= move_control.calculate_attack_damage(move, user, target)
-                print("Hit landed!")
+                #target["curr_hp"] -= move_control.calculate_attack_damage(move, user, target)
+                move_control.calculate_interaction(move, user, target)
                 # If someone is out of HP, return true. If not, keep going.
                 if check_round_middle(user, target):
                     return True
@@ -101,6 +107,8 @@ def check_round_end(fighterA, fighterB):
         elif fighter["status"] == "burn":
             fighter["curr_hp"] -= int(fighter["max_hp"] * moves.damage_multiplier_burn)
 
+
+
 def do_battle(fighterA, fighterB):
     #
     # Per round:
@@ -121,40 +129,48 @@ def do_battle(fighterA, fighterB):
         while moveA not in fighterA["moves"]:
             print("Choose Fighter 1 Move: ", end=" ")
             for num, move in enumerate(fighterA["moves"]):
-                print(str(num) + ": " + move + "  ", end="")
+                print(str(num) + ": " + case_change(move) + "  ", end="")
             moveA = input("\n")
             if moveA.isdigit() and int(moveA) in range(4):
                 moveA = fighterA["moves"][int(moveA)]
         fighterA["queued_move"] = moveA
-        print("moveA: " + moveA)
+        print("[   " + case_change(moveA) + "   ]")
         print()
         while moveB not in fighterB["moves"]:
             print("Choose Fighter 2 Move: ", end=" ")
             for num, move in enumerate(fighterB["moves"]):
-                print(str(num) + ": " + move + "  ", end="")
+                print(str(num) + ": " + case_change(move) + "  ", end="")
             moveB = input("\n")
             if moveB.isdigit() and int(moveB) in range(4):
                 moveB = fighterB["moves"][int(moveB)]
         fighterB["queued_move"] = moveB
-        print("moveB: " + moveB)
+        print("[   " + case_change(moveB) + "   ]")
 
         try:
             priority_a = int(move_control.moves_dict[moveA]["priority"])
         except KeyError:
-            print("Priority for " + moveA + " not found. Using default.")
+            print("Priority for " + case_change(moveA) + " not found. Using default.")
             priority_a = 0
         try:
             priority_b = int(move_control.moves_dict[moveB]["priority"])
         except KeyError:
-            print("Priority for " + moveB + " not found. Using default.")
+            print("Priority for " + case_change(moveB) + " not found. Using default.")
             priority_b = 0
         goes_first = 'a'
 
+        print("priority_a: " + str(priority_a))
+        print("priority_b: " + str(priority_b))
+        print("speed_a: " + str(fighterA["speed"]))
+        print("speed_b: " + str(fighterB["speed"]))
         # Priority Check
         if priority_a < priority_b:
             goes_first = 'b'
-        elif fighterA["speed"] < fighterB["speed"]:
-            goes_first = 'b'
+        if priority_a == priority_b:
+            if fighterA["speed"] < fighterB["speed"]:
+                goes_first = 'b'
+            elif fighterA["speed"] == fighterB["speed"]:
+                if random.random() < 0.5:
+                    goes_first = 'b'
 
         # Speed Check
         if goes_first == 'a':
@@ -219,7 +235,9 @@ if os.path.isfile("fighters.csv"):
                 fighter_temp["max_hp"] = fighter_temp["max_hp"] / 100
                 fighter_temp["max_hp"] = fighter_temp["max_hp"] + fighter_temp["level"] + 10
                 fighter_temp["curr_hp"] = int(fighter_temp["max_hp"])
+
             fighter_temp["moves"] = [row[11], row[12], row[13], row[14]]
+
             roster[row[0]] = fighter_temp
         if reader_obj:
                 BATTLE_CAN_HAPPEN = True
