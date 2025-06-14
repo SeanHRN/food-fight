@@ -3,6 +3,7 @@ import os.path
 import sys
 import csv
 from moves import Moves
+import moves
 import abilities
 sys.path.append(os.getcwd())
 
@@ -32,12 +33,12 @@ def do_turn(user, move, target):
         print("\"" + move + "\"" + " was not found!")
         return False
 
-    if move_control.moves_dict[move]["category"] == "status":
+    elif move_control.moves_dict[move]["category"] == "status":
         do_status_move(user, move)
 
     #WIP: Basic attack with protect and multi-hit compatibility
-    elif move_control.moves_dict[move]["category"] != "status":
 
+    elif move_control.moves_dict[move]["category"] != "status":
         # Case 1
         if target["state_protect"] is False:
             for _ in itertools.repeat(None, move_control.moves_dict[move]["instances"]):
@@ -86,7 +87,19 @@ def check_round_middle(fighterA, fighterB):
     return fighterA["curr_hp"] <= 0 or fighterB["curr_hp"] <= 0
 
 def check_round_end(fighterA, fighterB):
-    check_print_status(fighterA, fighterB)
+    l = [fighterA, fighterB]
+    for fighter in l:
+        if fighter["status"] == "poison":
+            if fighter["badly_poisoned"]:
+                fighter["curr_hp"] -= int(fighter["max_hp"] * \
+                    float(fighter["badly_poisoned_level"]) * moves.damage_multiplier_badly_poison)
+                fighter["badly_poisoned_level"] += moves.damage_multiplier_badly_poison
+            else:
+                fighter["curr_hp"] -= int(fighter["max_hp"] * moves.damage_multiplier_poison)
+            print(fighter["name"] + " is hurt by poison!")
+            print("HP is now: " + str(fighter["curr_hp"]))
+        elif fighter["status"] == "burn":
+            fighter["curr_hp"] -= int(fighter["max_hp"] * moves.damage_multiplier_burn)
 
 def do_battle(fighterA, fighterB):
     #
@@ -151,8 +164,8 @@ def do_battle(fighterA, fighterB):
             if not do_turn(fighterB, moveB, fighterA):
                 do_turn(fighterA, moveA, fighterB)
 
-        #TODO: Decide how to use this if move 2 is getting its own checks.
-        check_round_end(fighterA, fighterB)
+        if (fighterA["curr_hp"] > 0 and fighterB["curr_hp"] > 0):
+            check_round_end(fighterA, fighterB)
 
 
 BATTLE_CAN_HAPPEN = False
@@ -165,25 +178,47 @@ if os.path.isfile("fighters.csv"):
                 "name" : row[1],
                 "trainer" : row[2],
                 "types" : row[3].split('/'),
-                "max_hp" : int(row[4]),
+                "hp" : int(row[4]),
                 "phy_att" : int(row[5]),
                 "phy_def" : int(row[6]),
                 "spec_att" : int(row[7]),
                 "spec_def" : int(row[8]),
                 "speed" : int(row[9]),
                 "ability" : row[10],
-                "curr_hp" : int(row[4]),
                 "curr_stage_phy_att" : 0,
-                "curr_stage_phys_def" : 0,
+                "curr_stage_phy_def" : 0,
                 "curr_stage_spec_att" : 0,
                 "curr_stage_spec_def" : 0,
                 "curr_stage_speed" : 0,
                 "state_protect" : False,
                 "state_ability_activated" : False,
                 "weight" : float(row[15]),
-                "status" : [],
-                "queued_move" : "blank"
+                "status" : "none",
+                "badly_poisoned_level" : 0,
+                "badly_poisoned" : False,
+                "confused" : False,
+                "infatuated" : False,
+                "queued_move" : "blank",
+                "level" : 100,
+                "iv_hp" : 31,
+                "iv_phy_att" : 31,
+                "iv_phy_def" : 31,
+                "iv_spec_att" : 31,
+                "iv_spec_def" : 31,
+                "iv_speed" : 31,
+                "ev_hp" : 0,
+                "ev_phy_att" : 0,
+                "ev_phy_def" : 0,
+                "ev_spec_att" : 0,
+                "ev_spec_def" : 0,
+                "ev_speed" : 0,
             }
+            if fighter_temp["name"].lower() != "shedinja":
+                fighter_temp["max_hp"] = 2 * fighter_temp["hp"] + fighter_temp["iv_hp"] + (fighter_temp["ev_hp"]/4)
+                fighter_temp["max_hp"] = fighter_temp["max_hp"] * fighter_temp["level"]
+                fighter_temp["max_hp"] = fighter_temp["max_hp"] / 100
+                fighter_temp["max_hp"] = fighter_temp["max_hp"] + fighter_temp["level"] + 10
+                fighter_temp["curr_hp"] = int(fighter_temp["max_hp"])
             fighter_temp["moves"] = [row[11], row[12], row[13], row[14]]
             roster[row[0]] = fighter_temp
         if reader_obj:
@@ -198,7 +233,10 @@ if BATTLE_CAN_HAPPEN:
 
     check_print_hp(char_a, char_b)
     do_battle(char_a, char_b)
-    print(char_a["name"] + " HP: " + str(char_a["curr_hp"]))
-    print(char_b["name"] + " HP: " + str(char_b["curr_hp"]))
+    #print(char_a["name"] + " HP: " + str(char_a["curr_hp"]))
+    #print(char_b["name"] + " HP: " + str(char_b["curr_hp"]))
+
+    #print(char_a)
+    #print(char_b)
 
     print("\n\n--------------\n")

@@ -2,7 +2,7 @@ import csv
 import os.path
 import specific_moves
 
-stage_multiplier_dict_main_stats = {
+stage_multiplier_main_stats_dict = {
     -6: 2/8,
     -5: 2/7,
     -4: 2/6,
@@ -16,9 +16,14 @@ stage_multiplier_dict_main_stats = {
      4: 3,
      5: 7/2,
      6: 4
-
 }
 
+major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
+minor_status_set = {"confuse", "infatuate"}
+
+damage_multiplier_poison = 1/8
+damage_multiplier_badly_poison = 1/16
+damage_multiplier_burn = 1/16
 class Moves:
     moves_dict = {}
     abilities_dict = {}
@@ -110,14 +115,14 @@ class Moves:
         return value, message
 
     def calculate_attack_damage(self, move, user, target):
-        damage = self.moves_dict[move]["power"]
+        move_power = self.moves_dict[move]["power"]
 
-        # Special Effect
+        # Irregular Effect
         move_function = self.moves_dict[move]["effect_function"]
+        #print("move function:" + move_function)
         if move_function != "none":
             if move_function == "move_heat_crash()":
-                damage = specific_moves.move_heat_crash(user, target)
-                print("The heat crash power is: " + str(damage))
+                move_power = specific_moves.move_heat_crash(user, target)
             elif move_function == "move_sucker_punch()":
                 result = specific_moves.move_sucker_punch(target)
                 if not result:
@@ -126,14 +131,27 @@ class Moves:
             elif move_function == "move_scrape()":
                 specific_moves.move_scrape(user, target)
                 return 0
-        # Offense Stat
+            elif move_function == "move_analyzed_impale()":
+                move_power = specific_moves.move_analyzed_impale(self.moves_dict["analyzed_impale()"]["power"], user, target)
+
+
+        # Offense and Defense Stats
         if self.moves_dict[move]["category"] == "physical":
-            stage_offense_multiplier = stage_multiplier_dict_main_stats[int(user["curr_stage_phy_att"])]
-            print("stage offense multiplier: " + str(stage_offense_multiplier))
-            
+            attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
+            def_stat = target["phy_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_phy_def"])]
+        else:
+            attack_stat = user["spec_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_spec_att"])]
+            def_stat = target["spec_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_spec_def"])]
+
+
+        damage = (((user["level"] * 2) / 5) + 2) * move_power
+        
+        damage = damage * (attack_stat/def_stat)
+        damage = damage / 50
+
 
         # User Burned
-        if "burned" in user["status"] and self.moves_dict[move]["category"] == "physical":
+        if user["status"] == "burn" and self.moves_dict[move]["category"] == "physical":
             damage = damage * 0.5
             print("Damage reduced because " + user["name"] + " is burned!")
 
@@ -144,9 +162,9 @@ class Moves:
         # Type Effectiveness
         type_multiplier = 1.0
         for t in target["types"]:
-            print("type damage multiplier for " + t + ": " + self.types_dict[self.moves_dict[move]["type"]][t])
+            #print("      type damage multiplier for " + t + ": " + self.types_dict[self.moves_dict[move]["type"]][t])
             type_multiplier = type_multiplier * float(self.types_dict[self.moves_dict[move]["type"]][t])
-        print("total type multiplier: " + str(type_multiplier))
+        #print("      total type multiplier: " + str(type_multiplier))
         damage = damage * type_multiplier
 
         match type_multiplier:
@@ -157,4 +175,4 @@ class Moves:
             case 0:
                 print("It had no effect!")
 
-        return damage
+        return int(damage)

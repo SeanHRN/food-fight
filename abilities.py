@@ -10,5 +10,5 @@ def check_soup_burst(a, b):
         print(b["name"] + " is burned!")
         print(a["name"] + "'s stats sharply decreased!")
         b["curr_hp"] -= 80
-        b["status"].append("burned")
+        b["status"] = "burn"
         check_print_hp(a, b)
