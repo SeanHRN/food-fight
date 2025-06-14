@@ -238,7 +238,7 @@ if os.path.isfile("fighters.csv"):
 
 if BATTLE_CAN_HAPPEN:
     char_a = roster["1"]
-    char_b = roster["3"]
+    char_b = roster["2"]
 
     print("\n\n--------------\n")
 

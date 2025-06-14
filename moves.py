@@ -104,7 +104,7 @@ class Moves:
 
         try:
             ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
-            if ability_function != "none":
+            if ability_function == "check_technician":
                 curr_ability_function = getattr(abilities, ability_function)
                 return curr_ability_function(user, target, move, move_power) # currently works just for technician
         except KeyError:

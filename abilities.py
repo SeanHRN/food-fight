@@ -26,10 +26,16 @@ def check_soup_burst(user, target):
     if user["ability"] == "soup burst" and user["curr_hp"] <= (user["max_hp"]/2) and user["state_ability_activated"] is False:
         user["state_ability_activated"] = True
         print(user["name"] + " bursted soup!")
-        print(target["name"] + " is burned!")
+        user["curr_stage_phy_att"] -= 2
+        user["curr_stage_phy_def"] -= 2
+        user["curr_stage_spec_att"] -= 2
+        user["curr_stage_spec_def"] -= 2
+        user["curr_stage_speed"] -= 2
         print(user["name"] + "'s stats sharply decreased!")
         target["curr_hp"] -= 80
-        target["status"] = "burn"
+        if target["status"] == "none":
+            target["status"] = "burn"
+            print(target["name"] + " is burned!")
         check_print_hp(user, target)
 
 def check_technician(user, target, move, move_power):

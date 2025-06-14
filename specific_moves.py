@@ -125,6 +125,12 @@ def move_heat_crash(user, target):
                 return [2,120,0]
     return [1,0,0]
 
+def move_lunge(user, target):
+    if accuracy_check():
+        target["curr_stage_phy_att"] -= 1
+        return [2,0,0]
+    return [1,0,0]
+
 def move_sludge_bomb(user, target):
     if accuracy_check():
         if random.random() < 0.3:
