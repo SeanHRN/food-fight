@@ -1,10 +1,10 @@
 # food-fight
 Legally Distinct Portable Fighting Monster Battle System In Python
-
+<br>
 Play it in the terminal!
-
+<br>
 === Choose Your Fighters! ===
-
+<br>
 - Rice Ninja
 - Soup Dumpling
 - Dinuguanggal
