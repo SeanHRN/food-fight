@@ -2,5 +2,7 @@
 1,"Rice Ninja","player_1","grass/dark",65,70,40,40,40,120,"none","leaf blade","sucker punch","rice shuriken","blank attack",25.0
 2,"Soup Dumpling","player_2","water/fire",110,120,70,40,100,90,"soup burst","protect","jet punch","heat crash","lunge",130.0
 3,"Dinuguanggal","player_3","dark/poison",40,40,40,120,100,130,"technician","autotomize","scrape()","analyzed_impale()","acid spray",70.0
+4,"LaabGai","player_4","fighting/dragon",90,150,100,90,90,150,"punk rock","boomburst","mach_punch","dragon tail","drum roll",90.0
+5,"Halo-Halo","player_5","ice/rock",100,120,100,80,80,60,"skill link","ice shard","hail","icicle crash","stone edge",90.0
 560,"Gangster Punk Lizard","Sean","dark/fighting",65,90,115,45,115,58,"moxie","dragon dance","ice punch","crunch","drain punch",30.0
 254,"Forest Lizard","Sean","grass",70,85,65,105,85,120,"overgrow","leaf storm","giga drain","leaf blade","dragon pulse",115.0

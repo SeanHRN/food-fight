@@ -238,17 +238,31 @@ if os.path.isfile("fighters.csv"):
 
 
 if BATTLE_CAN_HAPPEN:
-    char_a = roster["1"]
-    char_b = roster["2"]
+    select_a = 99999
+    select_b = 99999
+
+
+    # TODO: Add team structure. Currently, it's just 1v1.
+
+    while select_a not in range(0, len(roster)):
+        print("Select Character 1")
+        for i,c in enumerate(roster):
+            print(str(i) + ": " + roster[c]["name"])
+        select_a = int(input())
+
+    while select_b not in range(0, len(roster)):
+        print("Select Character 2")
+        for i,c in enumerate(roster):
+            print(str(i) + ": " + roster[c]["name"])
+        select_b = int(input())
+
+
+    char_a = roster[str(select_a)].copy()
+    char_b = roster[str(select_b)].copy()
 
     print("\n\n--------------\n")
 
     check_print_hp(char_a, char_b)
     do_battle(char_a, char_b)
-    #print(char_a["name"] + " HP: " + str(char_a["curr_hp"]))
-    #print(char_b["name"] + " HP: " + str(char_b["curr_hp"]))
-
-    #print(char_a)
-    #print(char_b)
 
     print("\n\n--------------\n")

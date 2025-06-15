@@ -43,3 +43,4 @@ def check_technician(user, target, move, move_power):
         if move_power <= 60:
             print(user["name"] + "'s " + move.title() + " is boosted by Technician!")
             return move_power * 1.50
+    return move_power
