@@ -1,3 +1,4 @@
+import json
 import csv
 import os.path
 import specific_moves
@@ -55,133 +56,146 @@ if os.path.isfile("type_chart.csv"):
             }
             types_dict[row[0]] = type_temp
 
-class Moves:
+natures_dict = {}
+if os.path.isfile("natures.json"):
+    with open("natures.json", "r", encoding="UTF-8") as nature_file:
+        nature_data = json.load(nature_file)
+        nature_temp = {}
+        for nature in nature_data["natures"]:
+            for nkey, nvalue in nature.items():
+                nature_temp[nkey] = nvalue
+            natures_dict[nature_temp["name"]] = nature
+
+# Testing
+#print(natures_dict)
+
+#class Moves:
 
     #def __init__(self):
 
-    def change_stage_main_stat(self, target, stat, change):
-        if target[stat] == 6 and change > 0:
-            print(stat + " can't go any higher!")
-        elif target[stat] == -6 and change < 0:
-            print(stat + " can't go any lower!")
+def change_stage_main_stat(target, stat, change):
+    if target[stat] == 6 and change > 0:
+        print(stat + " can't go any higher!")
+    elif target[stat] == -6 and change < 0:
+        print(stat + " can't go any lower!")
+    else:
+        target[stat] = target[stat] + change
+        if target[stat] < 6:
+            target[stat] = 6
+        elif target[stat] < -6:
+            target[stat] = -6
+
+
+def type_interaction(move_type, target_type):
+    # Returns pair: 0: Interaction Value, 1: Interaction Message
+    try:
+        value = types_dict[move_type][target_type]
+    except KeyError:
+        value = 1
+    message = ""
+    if value == 2:
+        message = "It's super effective!"
+    elif value == 0.5:
+        message = "It's not very effective..."
+    elif value == 0:
+        message = "It had no effect."
+    return value, message
+
+def do_status_move(user, move):
+    try:
+        move_function = specific_moves.moves_dict[move]["effect_function"]
+        if move_function != "none":
+            move_function = getattr(specific_moves, move_function)
+            move_function(user)
+            return
         else:
-            target[stat] = target[stat] + change
-            if target[stat] < 6:
-                target[stat] = 6
-            elif target[stat] < -6:
-                target[stat] = -6
+            print("DEBUG: effect_function set to 'none'")
+    except KeyError:
+        print("Move not found!")
+    return
 
+def ability_check_category_1(user, target, move, move_power):
 
-    def type_interaction(self, move_type, target_type):
-        # Returns pair: 0: Interaction Value, 1: Interaction Message
-        try:
-            value = types_dict[move_type][target_type]
-        except KeyError:
-            value = 1
-        message = ""
-        if value == 2:
-            message = "It's super effective!"
-        elif value == 0.5:
-            message = "It's not very effective..."
-        elif value == 0:
-            message = "It had no effect."
-        return value, message
-
-    def do_status_move(self, user, move):
-        try:
-            move_function = specific_moves.moves_dict[move]["effect_function"]
-            if move_function != "none":
-                move_function = getattr(specific_moves, move_function)
-                move_function(user)
-                return
-            else:
-                print("DEBUG: effect_function set to 'none'")
-        except KeyError:
-            print("Move not found!")
-        return
-
-    def ability_check_category_1(self, user, target, move, move_power):
-
-        try:
-            ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
-            if ability_function == "check_technician":
-                curr_ability_function = getattr(abilities, ability_function)
-                return curr_ability_function(user, target, move, move_power) # currently works just for technician
-        except KeyError:
-            return move_power
-
+    try:
+        ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
+        if ability_function == "check_technician":
+            curr_ability_function = getattr(abilities, ability_function)
+            return curr_ability_function(user, target, move, move_power) # currently works just for technician
+    except KeyError:
         return move_power
 
-    def calculate_interaction(self, move, user, target):
-        damage = 0
-        move_power = specific_moves.moves_dict[move]["power"]
+    return move_power
 
-        # Irregular Effect
-        move_function = specific_moves.moves_dict[move]["effect_function"]
+def calculate_interaction(move, user, target):
+    damage = 0
+    move_power = specific_moves.moves_dict[move]["power"]
 
-        if move_function != "none":
-            curr_irregular_move_function = getattr(specific_moves, move_function)
-            result = curr_irregular_move_function(user, target)
-            # Tuple Code System
-            # [0]: 0: Failure, 1: Missed, 2: Success (Regular Interaction)
-            #      3: Success OR Failed via Ability Resolve (Halt calculate_interaction() Immediately)
-            # [1]: Irregular damage to apply
-            # [2]: 0: The return value is a damage addition. 1: The return value is a damage multiplier.
-            if result[0] == 0:
-                print("It failed!")
-                return
-            elif result[0] == 1:
-                print("It missed!")
-                return
-            elif result[0] == 2:
-                if result[2] == 0:
-                    move_power += result[1]
-                elif result[2] == 1:
-                    move_power *= result[1]
-            else: # result[0] == 3
-                return
+    # Irregular Effect
+    move_function = specific_moves.moves_dict[move]["effect_function"]
 
-        # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
-        move_power = self.ability_check_category_1(user, target, move, move_power)
+    if move_function != "none":
+        curr_irregular_move_function = getattr(specific_moves, move_function)
+        result = curr_irregular_move_function(user, target)
+        # Tuple Code System
+        # [0]: 0: Failure, 1: Missed, 2: Success (Regular Interaction)
+        #      3: Success OR Failed via Ability Resolve (Halt calculate_interaction() Immediately)
+        # [1]: Irregular damage to apply
+        # [2]: 0: The return value is a damage addition. 1: The return value is a damage multiplier.
+        if result[0] == 0:
+            print("It failed!")
+            return
+        elif result[0] == 1:
+            print("It missed!")
+            return
+        elif result[0] == 2:
+            if result[2] == 0:
+                move_power += result[1]
+            elif result[2] == 1:
+                move_power *= result[1]
+        else: # result[0] == 3
+            return
 
-
-        # Offense and Defense Stats
-        if specific_moves.moves_dict[move]["category"] == "physical":
-            attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
-            def_stat = target["phy_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_phy_def"])]
-        else:
-            attack_stat = user["spec_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_spec_att"])]
-            def_stat = target["spec_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_spec_def"])]
+    # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
+    move_power = ability_check_category_1(user, target, move, move_power)
 
 
-        damage = (((user["level"] * 2) / 5) + 2) * move_power
-        
-        damage = damage * (attack_stat/def_stat)
-        damage = damage / 50
+    # Offense and Defense Stats
+    if specific_moves.moves_dict[move]["category"] == "physical":
+        attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
+        def_stat = target["phy_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_phy_def"])]
+    else:
+        attack_stat = user["spec_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_spec_att"])]
+        def_stat = target["spec_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_spec_def"])]
 
 
-        # User Burned
-        if user["status"] == "burn" and specific_moves.moves_dict[move]["category"] == "physical":
-            damage = damage * 0.5
-            print("Damage reduced because " + user["name"] + " is burned!")
-
-        #STAB
-        if specific_moves.moves_dict[move]["type"] in user["types"]:
-            damage = damage * 1.5
-
-        # Type Effectiveness
-        type_multiplier = 1.0
-        for t in target["types"]:
-            type_multiplier = type_multiplier * float(types_dict[specific_moves.moves_dict[move]["type"]][t])
-        damage = damage * type_multiplier
-
-        match type_multiplier:
-            case 2.0:
-                print("It's super effective!")
-            case 0.5:
-                print("It's not very effective...")
-            case 0:
-                print("It had no effect!")
+    damage = (((user["level"] * 2) / 5) + 2) * move_power
+    
+    damage = damage * (attack_stat/def_stat)
+    damage = damage / 50
 
 
-        target["curr_hp"] -= int(damage)
+    # User Burned
+    if user["status"] == "burn" and specific_moves.moves_dict[move]["category"] == "physical":
+        damage = damage * 0.5
+        print("Damage reduced because " + user["name"] + " is burned!")
+
+    #STAB
+    if specific_moves.moves_dict[move]["type"] in user["types"]:
+        damage = damage * 1.5
+
+    # Type Effectiveness
+    type_multiplier = 1.0
+    for t in target["types"]:
+        type_multiplier = type_multiplier * float(types_dict[specific_moves.moves_dict[move]["type"]][t])
+    damage = damage * type_multiplier
+
+    match type_multiplier:
+        case 2.0:
+            print("It's super effective!")
+        case 0.5:
+            print("It's not very effective...")
+        case 0:
+            print("It had no effect!")
+
+
+    target["curr_hp"] -= int(damage)

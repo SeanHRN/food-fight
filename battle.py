@@ -1,17 +1,14 @@
+import math
 import itertools
 import os.path
 import random
 import sys
 import csv
-from moves import Moves
+import json
 import moves
 import abilities
 sys.path.append(os.getcwd())
 
-
-### Use the CSV to make the character dictionary
-move_control = Moves()
-roster = {}
 
 def case_change(move):
     if move in moves.dinu_moves_set:
@@ -37,72 +34,71 @@ def do_turn(user, move, target):
         return False
 
     elif moves.specific_moves.moves_dict[move]["category"] == "status":
-        move_control.do_status_move(user, move)
+        moves.do_status_move(user, move)
 
     # Uses a loop so that multi-hit moves can work.
     elif moves.specific_moves.moves_dict[move]["category"] != "status":
         if target["state_protect"] is False:
             for _ in itertools.repeat(None, moves.specific_moves.moves_dict[move]["instances"]):
-                move_control.calculate_interaction(move, user, target)
+                moves.calculate_interaction(move, user, target)
                 if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
                     return True
         else:
             print(target["name"] + " protected itself!")
     return False
 
-def check_print_hp(fighterA, fighterB):
-    l = [fighterA, fighterB]
+def check_print_hp(fighter_a, fighter_b):
+    l = [fighter_a, fighter_b]
     for fighter in l:
         print(fighter["name"] + " HP: " + str(fighter["curr_hp"]))
 
-def check_print_status(fighterA, fighterB):
-    l = [fighterA, fighterB]
+def check_print_status(fighter_a, fighter_b):
+    l = [fighter_a, fighter_b]
     for fighter in l:
         if fighter["status"]:
             print("Status effect(s) on " + fighter["name"] + ": ", end="")
             for s in fighter["status"]:
                 print(s)
 
-def check_round_start(fighterA, fighterB):
+def check_round_start(fighter_a, fighter_b):
     #print("check round start")
-    l = [fighterA, fighterB]
+    l = [fighter_a, fighter_b]
     for fighter in l:
         fighter["state_protect"] = False
 
 
-def check_ability(fighterA, fighterB):
-    l = [fighterA, fighterB]
+def check_ability(fighter_a, fighter_b):
+    l = [fighter_a, fighter_b]
     for index,fighter in enumerate(l):
         abilities.check_soup_burst(fighter, l[1-index])
 
 
-def check_round_middle(fighterA, fighterB):
-    check_print_hp(fighterA, fighterB)
-    check_ability(fighterA, fighterB)
+def check_round_middle(fighter_a, fighter_b):
+    check_print_hp(fighter_a, fighter_b)
+    check_ability(fighter_a, fighter_b)
 
-    if fighterA["curr_hp"] <= 0 or fighterB["curr_hp"] <= 0:
+    if fighter_a["curr_hp"] <= 0 or fighter_b["curr_hp"] <= 0:
         print("The fight is over.\n\n")
 
-    return fighterA["curr_hp"] <= 0 or fighterB["curr_hp"] <= 0
+    return fighter_a["curr_hp"] <= 0 or fighter_b["curr_hp"] <= 0
 
-def check_round_end(fighterA, fighterB):
-    l = [fighterA, fighterB]
+def check_round_end(fighter_a, fighter_b):
+    l = [fighter_a, fighter_b]
     for fighter in l:
         if fighter["status"] == "poison":
             if fighter["badly_poisoned"]:
-                fighter["curr_hp"] -= int(fighter["max_hp"] * \
+                fighter["curr_hp"] -= int(fighter["hp"] * \
                     float(fighter["badly_poisoned_level"]) * moves.damage_multiplier_badly_poison)
                 fighter["badly_poisoned_level"] += moves.damage_multiplier_badly_poison
             else:
-                fighter["curr_hp"] -= int(fighter["max_hp"] * moves.damage_multiplier_poison)
+                fighter["curr_hp"] -= int(fighter["hp"] * moves.damage_multiplier_poison)
             print(fighter["name"] + " is hurt by poison!")
             print("HP is now: " + str(fighter["curr_hp"]))
         elif fighter["status"] == "burn":
-            fighter["curr_hp"] -= int(fighter["max_hp"] * moves.damage_multiplier_burn)
+            fighter["curr_hp"] -= int(fighter["hp"] * moves.damage_multiplier_burn)
 
 
-
-def do_battle(fighterA, fighterB):
+def do_battle(fighter_a, fighter_b):
     #
     # Per round:
     #     1. Check starting conditions.
@@ -113,134 +109,162 @@ def do_battle(fighterA, fighterB):
     #     6. Do the second move.
     #     7. Check the result.
     #
-    while (fighterA["curr_hp"] > 0 and fighterB["curr_hp"] > 0):
+    while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
 
         print()
-        check_round_start(fighterA, fighterB)
+        check_round_start(fighter_a, fighter_b)
 
-        moveA = ""
-        moveB = ""
-        while moveA not in fighterA["moves"]:
-            print("Choose Fighter 1 Move: ", end=" ")
-            for num, move in enumerate(fighterA["moves"]):
-                print(str(num) + ": " + case_change(move) + "  ", end="")
-            moveA = input("\n")
-            if moveA.isdigit() and int(moveA) in range(4):
-                moveA = fighterA["moves"][int(moveA)]
-        fighterA["queued_move"] = moveA
-        print("[   " + case_change(moveA) + "   ]")
-        print()
-        while moveB not in fighterB["moves"]:
-            print("Choose Fighter 2 Move: ", end=" ")
-            for num, move in enumerate(fighterB["moves"]):
-                print(str(num) + ": " + case_change(move) + "  ", end="")
-            moveB = input("\n")
-            if moveB.isdigit() and int(moveB) in range(4):
-                moveB = fighterB["moves"][int(moveB)]
-        fighterB["queued_move"] = moveB
-        print("[   " + case_change(moveB) + "   ]")
+        for f in [fighter_a, fighter_b]:
+            selected_move = ""
+            while selected_move not in f["moves"]:
+                print("Choose " + f["name"] + "'s Move: ", end=" ")
+                for num, m in enumerate(f["moves"]):
+                    print(str(num) + ": " + case_change(m) + "  ", end="")
+                selected_move = input("\n")
+                if selected_move.isdigit() and int(selected_move) in range(4):
+                    selected_move = f["moves"][int(selected_move)]
+            f["queued_move"] = selected_move
+            print("[   " + case_change(selected_move) + "   ]\n")
+            if selected_move != "protect": # Refresh Protect Counter
+                f["count_protect"] = 0
 
         try:
-            priority_a = int(moves.specific_moves.moves_dict[moveA]["priority"])
+            priority_a = int(moves.specific_moves.moves_dict[fighter_a["queued_move"]]["priority"])
         except KeyError:
-            print("Priority for " + case_change(moveA) + " not found. Using default.")
+            print("Priority for " + case_change(fighter_a["queued_move"]) + " not found. Using default.")
             priority_a = 0
         try:
-            priority_b = int(moves.specific_moves.moves_dict[moveB]["priority"])
+            priority_b = int(moves.specific_moves.moves_dict[fighter_b["queued_move"]]["priority"])
         except KeyError:
-            print("Priority for " + case_change(moveB) + " not found. Using default.")
+            print("Priority for " + case_change(fighter_b["queued_move"]) + " not found. Using default.")
             priority_b = 0
         goes_first = 'a'
 
-        #print("priority_a: " + str(priority_a))
-        #print("priority_b: " + str(priority_b))
-        #print("speed_a: " + str(fighterA["speed"]))
-        #print("speed_b: " + str(fighterB["speed"]))
+
         # Priority Check
         if priority_a < priority_b:
             goes_first = 'b'
         if priority_a == priority_b:
-            if fighterA["speed"] < fighterB["speed"]:
+            speed_mult_a = moves.stage_multiplier_main_stats_dict[fighter_a["curr_stage_speed"]]
+            speed_mult_b = moves.stage_multiplier_main_stats_dict[fighter_b["curr_stage_speed"]]
+            if fighter_a["speed"] * speed_mult_a < fighter_b["speed"] * speed_mult_b:
                 goes_first = 'b'
-            elif fighterA["speed"] == fighterB["speed"]:
+            elif fighter_a["speed"] == fighter_b["speed"]:
                 if random.random() < 0.5:
                     goes_first = 'b'
 
         # Speed Check
+        # 'if not', meaning: If this doesn't end the fight, keep going.
         if goes_first == 'a':
-            if not do_turn(fighterA, moveA, fighterB):
-                do_turn(fighterB, moveB, fighterA)
+            if not do_turn(fighter_a, fighter_a["queued_move"], fighter_b):
+                do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
         else:
-            if not do_turn(fighterB, moveB, fighterA):
-                do_turn(fighterA, moveA, fighterB)
+            if not do_turn(fighter_b, fighter_b["queued_move"], fighter_a):
+                do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
 
-        if (fighterA["curr_hp"] > 0 and fighterB["curr_hp"] > 0):
-            check_round_end(fighterA, fighterB)
+        if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
+            check_round_end(fighter_a, fighter_b)
 
 
+        for f in [fighter_a, fighter_b]:
+            f["previous_move"] = f["queued_move"]
+
+
+def determine_stats(f):
+    '''
+    Uses the formulas to convert the base stats, level, EVs, and IVs into the actual stats.
+    '''
+    # HP
+    if f["name"].lower() != "shedinja":
+        f["hp"] = 2 * f["base_hp"] + f["iv_hp"]
+        f["hp"] += f["ev_hp"] * 0.25
+        f["hp"] *= f["level"]
+        f["hp"] /= 100
+        f["hp"] += f["level"] + 10
+        f["hp"] = int(f["hp"])
+    else:
+        f["hp"] = 1
+    f["curr_hp"] = int(f["hp"])
+
+    # All Other Stats
+    # Default to Serious nature if the nature is undefined.
+    try:
+        up_stat = moves.natures_dict[f["nature"]]["up"]
+        down_stat = moves.natures_dict[f["nature"]]["down"]
+    except KeyError:
+        up_stat = moves.natures_dict["serious"]["up"]
+        down_stat = moves.natures_dict["serious"]["down"]
+
+    nature_multiplier = 0
+
+    for stat in ["phy_att", "phy_def", "spec_att", "spec_def", "speed"]:
+        if up_stat == stat and down_stat != stat: # Neutral natures have cancelling ups and downs.
+            nature_multiplier = 1.10
+        elif down_stat == stat:
+            nature_multiplier = 0.9
+        else:
+            nature_multiplier = 1.0
+        s = 2 * f["base_"+stat] + f["iv_"+stat] + f["ev_"+stat]
+        s *= f["level"]
+        s /= 100
+        s += 5
+        s *= nature_multiplier
+        f[stat] = int(s)
+
+
+def debug_print(fighter_a, fighter_b):
+    print("\n-- Fighters' Stats: --")
+    for f in [fighter_a, fighter_b]:
+        print(f["name"])
+        for s in ["hp","phy_att","phy_def","spec_att","spec_def","speed"]:
+            print(s + ": " + str(f[s]))
+        print()
+    print("- - -")
+
+### Start of the part that runs. ###
 BATTLE_CAN_HAPPEN = False
-if os.path.isfile("fighters.csv"):
-    with open("fighters.csv", newline='') as fighter_file:
-        reader_obj = csv.reader(fighter_file)
+roster = {}
 
-        for row in reader_obj:
-            fighter_temp = {   # the id, row[0], is just the key.
-                "name" : row[1],
-                "trainer" : row[2],
-                "types" : row[3].split('/'),
-                "hp" : int(row[4]),
-                "phy_att" : int(row[5]),
-                "phy_def" : int(row[6]),
-                "spec_att" : int(row[7]),
-                "spec_def" : int(row[8]),
-                "speed" : int(row[9]),
-                "ability" : row[10].lower(),
-                "curr_stage_phy_att" : 0,
-                "curr_stage_phy_def" : 0,
-                "curr_stage_spec_att" : 0,
-                "curr_stage_spec_def" : 0,
-                "curr_stage_speed" : 0,
-                "state_protect" : False,
-                "state_ability_activated" : False,
-                "weight" : float(row[15]),
-                "status" : "none",
-                "badly_poisoned_level" : 0,
-                "badly_poisoned" : False,
-                "confused" : False,
-                "infatuated" : False,
-                "queued_move" : "blank",
-                "level" : 100,
-                "iv_hp" : 31,
-                "iv_phy_att" : 31,
-                "iv_phy_def" : 31,
-                "iv_spec_att" : 31,
-                "iv_spec_def" : 31,
-                "iv_speed" : 31,
-                "ev_hp" : 0,
-                "ev_phy_att" : 0,
-                "ev_phy_def" : 0,
-                "ev_spec_att" : 0,
-                "ev_spec_def" : 0,
-                "ev_speed" : 0,
-            }
-            if fighter_temp["name"].lower() != "shedinja":
-                fighter_temp["max_hp"] = 2 * fighter_temp["hp"] + fighter_temp["iv_hp"] + (fighter_temp["ev_hp"]/4)
-                fighter_temp["max_hp"] = fighter_temp["max_hp"] * fighter_temp["level"]
-                fighter_temp["max_hp"] = fighter_temp["max_hp"] / 100
-                fighter_temp["max_hp"] = fighter_temp["max_hp"] + fighter_temp["level"] + 10
-                fighter_temp["curr_hp"] = int(fighter_temp["max_hp"])
+if os.path.isfile("fighters.json"):
+    with open("fighters.json", "r", encoding="UTF-8") as fighter_file:
+        fighter_data = json.load(fighter_file)
+        for fighter in fighter_data["fighters"]:
+            fighter_temp = {}
+            for key, value in fighter.items():
+                fighter_temp[key] = value
+            # For values not declared in the character JSON
+            fighter_temp["curr_stage_phy_att"] = 0
+            fighter_temp["curr_stage_phy_def"] = 0
+            fighter_temp["curr_stage_spec_att"] = 0
+            fighter_temp["curr_stage_spec_def"] = 0
+            fighter_temp["curr_stage_speed"] = 0
+            fighter_temp["state_protect"] = False
+            fighter_temp["state_ability_activated"] = False
+            fighter_temp["status"] = "none"
+            fighter_temp["badly_poisoned_level"] = 0
+            fighter_temp["badly_poisoned"] = False
+            fighter_temp["confused"] = False
+            fighter_temp["infatuated"] = False
+            fighter_temp["queued_move"] = "blank"
+            fighter_temp["previous_move"] = "blank"
+            fighter_temp["count_protect"] = 0
+            fighter_temp["hp"] = 0
+            fighter_temp["phy_att"] = 0
+            fighter_temp["phy_def"] = 0
+            fighter_temp["spec_att"] = 0
+            fighter_temp["spec_def"] = 0
+            fighter_temp["speed"] = 0
+            determine_stats(fighter_temp)
 
-            fighter_temp["moves"] = [row[11], row[12], row[13], row[14]]
-
-            roster[row[0]] = fighter_temp
-        if reader_obj:
-                BATTLE_CAN_HAPPEN = True
+            fighter_temp["moves"] = [fighter_temp["move_0"],fighter_temp["move_1"],fighter_temp["move_2"],fighter_temp["move_3"]]
+            roster[fighter_temp["id"]] = fighter_temp
+        if fighter_data:
+            BATTLE_CAN_HAPPEN = True
 
 
 if BATTLE_CAN_HAPPEN:
     select_a = 99999
     select_b = 99999
-
 
     # TODO: Add team structure. Currently, it's just 1v1.
 
@@ -256,9 +280,12 @@ if BATTLE_CAN_HAPPEN:
             print(str(i) + ": " + roster[c]["name"])
         select_b = int(input())
 
+    char_a = roster[select_a].copy()
+    char_b = roster[select_b].copy()
 
-    char_a = roster[str(select_a)].copy()
-    char_b = roster[str(select_b)].copy()
+    print("\n\n--------------\n")
+
+    debug_print(char_a, char_b)
 
     print("\n\n--------------\n")
 

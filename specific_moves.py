@@ -42,7 +42,7 @@ def check_can_be_poisoned(user, target):
         case _:
             return 2
 
-def accuracy_check():
+def check_accuracy():
     return True
 
 
@@ -83,7 +83,7 @@ def print_ability_protect(user):
 ### Attack/Contact Moves ###
 
 def move_acid_spray(user, target):
-    if accuracy_check():
+    if check_accuracy():
         if target["ability"] == "bulletproof":
             print_ability_protect(target)
             return [3,0,0]
@@ -92,15 +92,15 @@ def move_acid_spray(user, target):
     return [1,0,0]
 
 def move_crunch(user, target):
-    if accuracy_check():
+    if check_accuracy():
         if random.random() < 0.2:
             target["curr_stage_phy_def"] -= 1
         return [2,0,0]
     return [1,0,0]
 
 def move_analyzed_impale(user, target):
-    if accuracy_check():
-        user["curr_hp"] -= int(user["max_hp"] / 16)
+    if check_accuracy():
+        user["curr_hp"] -= int(user["hp"] / 16)
         if target["status"] == "poisoned":
             print("analyzed_impale() is boosted with poison!")
             return [2,2,1]
@@ -110,7 +110,7 @@ def move_analyzed_impale(user, target):
 def move_heat_crash(user, target):
     # Python match-case doesn't have fall-through,
     # so there are no explicit breaks.
-    if accuracy_check():
+    if check_accuracy():
         percentage = target["weight"] / user["weight"]
         match percentage:
             case _ if percentage > 0.5:
@@ -126,13 +126,28 @@ def move_heat_crash(user, target):
     return [1,0,0]
 
 def move_lunge(user, target):
-    if accuracy_check():
+    if check_accuracy():
         target["curr_stage_phy_att"] -= 1
         return [2,0,0]
     return [1,0,0]
 
+
+def move_scald(user, target):
+    if user["status"] == "frozen":
+        user["status"] = "none"
+        print(user["name"] + " thawed!")
+    if check_accuracy():
+        if random.random() < 0.3:
+            target["status"] = "burn"
+            print(target["name"] + " is burned!")
+        return [2,0,0]
+    else:
+        return [1,0,0]
+
+
+
 def move_sludge_bomb(user, target):
-    if accuracy_check():
+    if check_accuracy():
         if random.random() < 0.3:
             if target["status"] == "none":
                 target["status"] = "poison"
@@ -141,14 +156,14 @@ def move_sludge_bomb(user, target):
     return [1,0,0]
 
 def move_sucker_punch(user, target):
-    if accuracy_check():
+    if check_accuracy():
         if moves_dict[target["queued_move"]]["category"] != "status":
             return [2,0,0]
         else:
             return [0,0,0]
 
 def move_scrape(user, target):
-    if accuracy_check():
+    if check_accuracy():
         poison_reason = check_can_be_poisoned(user, target)
         if poison_reason == 0:
             target["status"] = "poison"
@@ -167,7 +182,7 @@ def move_scrape(user, target):
 
 def move_toxic(user, target):
     # Toxic specifically sets the badly poison level to 1.
-    if accuracy_check():
+    if check_accuracy():
         if check_can_be_poisoned(user, target) != 0:
             print("It had no effect!")
         else:
@@ -191,3 +206,24 @@ def move_dragon_dance(user):
     print_stat_level_change(user, ["phy_att", "speed"], [1, 1])
     user["curr_stage_phy_att"] += 1
     user["curr_stage_speed"] += 1
+
+def move_protect(user):
+    '''
+    The count is refreshed during the battle loop as needed.
+    '''
+    allow_protect = False
+    user["count_protect"] += 1
+
+    if user["count_protect"] == 1:
+        allow_protect = True
+    else:
+        chance = 0.333 * user["count_protect"]
+        if random.random() < chance:
+            allow_protect = True
+        else:
+            print("Protect failed!")
+            allow_protect = False
+    if allow_protect:
+        user["state_protect"] = True
+    else:
+        user["state_protect"] = False

@@ -1,0 +1,155 @@
+{
+    "natures": [
+    {
+    "number": "0",
+    "name" : "hardy",
+    "up" : "phy_att",
+    "down" : "phy_att"
+    },
+    {
+    "number": "1",
+    "name" : "lonely",
+    "up" : "phy_att",
+    "down" : "phy_def"
+    },
+    {
+    "number": "2",
+    "name" : "brave",
+    "up" : "phy_att",
+    "down" : "speed"
+    },
+    {
+    "number": "3",
+    "name" : "adamant",
+    "up" : "phy_att",
+    "down" : "spec_att"
+    },
+    {
+    "number": "4",
+    "name" : "naughty",
+    "up" : "phy_att",
+    "down" : "spec_def"
+    },
+    {
+    "number": "5",
+    "name" : "bold",
+    "up" : "phy_def",
+    "down" : "phy_att"
+    },
+    {
+    "number": "6",
+    "name" : "docile",
+    "up" : "phy_def",
+    "down" : "phy_def"
+    },
+    {
+    "number": "7",
+    "name" : "relaxed",
+    "up" : "phy_def",
+    "down" : "speed"
+    },
+    {
+    "number": "8",
+    "name" : "impish",
+    "up" : "phy_def",
+    "down" : "spec_att"
+    },
+    {
+    "number": "9",
+    "name" : "lax",
+    "up" : "phy_def",
+    "down" : "spec_def"
+    },
+    {
+    "number": "10",
+    "name" : "timid",
+    "up" : "speed",
+    "down" : "phy_att"
+    },
+    {
+    "number": "11",
+    "name" : "hasty",
+    "up" : "speed",
+    "down" : "phy_def"
+    },
+    {
+    "number": "12",
+    "name" : "serious",
+    "up" : "speed",
+    "down" : "speed"
+    },
+    {
+    "number": "13",
+    "name" : "jolly",
+    "up" : "speed",
+    "down" : "spec_att"
+    },
+    {
+    "number": "14",
+    "name" : "naive",
+    "up" : "speed",
+    "down" : "spec_def"
+    },
+    {
+    "number": "15",
+    "name" : "modest",
+    "up" : "spec_att",
+    "down" : "phy_att"
+    },
+    {
+    "number": "16",
+    "name" : "mild",
+    "up" : "spec_att",
+    "down" : "spec_def"
+    },
+    {
+    "number": "17",
+    "name" : "quiet",
+    "up" : "spec_att",
+    "down" : "speed"
+    },
+    {
+    "number": "18",
+    "name" : "bashful",
+    "up" : "spec_att",
+    "down" : "spec_att"
+    },
+    {
+    "number": "19",
+    "name" : "rash",
+    "up" : "spec_att",
+    "down" : "spec_def"
+    },
+    {
+    "number": "20",
+    "name" : "calm",
+    "up" : "spec_def",
+    "down" : "phy_att"
+    },
+    {
+    "number": "21",
+    "name" : "gentle",
+    "up" : "spec_def",
+    "down" : "phy_def"
+    },
+    {
+    "number": "22",
+    "name" : "sassy",
+    "up" : "spec_def",
+    "down" : "speed"
+    },
+    {
+    "number": "23",
+    "name" : "careful",
+    "up" : "spec_def",
+    "down" : "spec_att"
+    },
+    {
+    "number": "24",
+    "name" : "quirky",
+    "up" : "spec_def",
+    "down" : "spec_def"
+    }
+    ]
+}
+

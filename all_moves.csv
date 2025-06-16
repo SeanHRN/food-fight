@@ -12,3 +12,4 @@
 "sludge bomb","poison","special",16,90,100,0,1,"move_sludge_bomb",0,1,"The user hurls unsanitary sludge at the target to inflict damage. This may also poison the target."
 "sucker punch","dark","physical",8,70,100,1,1,"move_sucker_punch",1,1,"This move enables the user to attack first. This move fails if the target is not readying an attack."
 "acid spray","poison","special",32,40,100,0,1,"move_acid_spray",0,1,"The user attacks by spitting fluid that works to melt the target. This also harshly lowers the target's Sp. Def stat."
+"scald","water","special",24,80,100,0,1,"move_scald",0,1,"The user attacks by shooting boiling hot water at the target. This may also leave the target with a burn."

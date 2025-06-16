@@ -4,9 +4,11 @@ import random
 import sys
 import csv
 import itertools
+import specific_moves
+import moves
+
 
 abilities_dict = {}
-
 if os.path.isfile("all_abilities.csv"):
     with open("all_abilities.csv", newline='', encoding="UTF-8") as type_file:
         reader_obj_abilities = csv.reader(type_file)
@@ -23,7 +25,7 @@ def check_print_hp(fighterA, fighterB):
     print(fighterB["name"] + " HP: " + str(fighterB["curr_hp"]))
 
 def check_soup_burst(user, target):
-    if user["ability"] == "soup burst" and user["curr_hp"] <= (user["max_hp"]/2) and user["state_ability_activated"] is False:
+    if user["ability"] == "soup burst" and user["curr_hp"] <= (user["hp"]/2) and user["state_ability_activated"] is False:
         user["state_ability_activated"] = True
         print(user["name"] + " bursted soup!")
         user["curr_stage_phy_att"] -= 2
@@ -32,10 +34,14 @@ def check_soup_burst(user, target):
         user["curr_stage_spec_def"] -= 2
         user["curr_stage_speed"] -= 2
         print(user["name"] + "'s stats sharply decreased!")
-        target["curr_hp"] -= 80
-        if target["status"] == "none":
-            target["status"] = "burn"
-            print(target["name"] + " is burned!")
+        moves.calculate_interaction("scald", user, target) #experimental
+        #specific_moves.move_scald(user, target)
+        #if specific_moves.check_accuracy():
+        #    if specific_moves.check_can_hit():
+        #        target["curr_hp"] -= 80
+        #        if target["status"] == "none":
+        #            target["status"] = "burn"
+        #            print(target["name"] + " is burned!")
         check_print_hp(user, target)
 
 def check_technician(user, target, move, move_power):
