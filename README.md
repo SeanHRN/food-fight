@@ -1,5 +1,6 @@
 # food-fight
 Legally Distinct Portable Fighting Monster Battle System In Python
+v0.1
 <br>
 Play it in the terminal!
 <br>
@@ -8,8 +9,7 @@ Play it in the terminal!
 - Rice Ninja
 - Soup Dumpling
 - Dinuguanggal
-- Gangster Punk Lizard
-- Forest Lizard
+
 
 ## Features ##
 - Turn-based battle system with speed and priority
@@ -21,7 +21,7 @@ Play it in the terminal!
 - Status effects (poison, bad poison, and burn)
 - Specialized effect moves and abilities
 - Attack damage formula factoring in levels, types, IVs, EVs, status effect, etc.
-- All IVs are 31
+- All IVs are 31 by default
 - Fighters, moves, abilities, and types loaded in via .csv
 - Cicada Husk Ghost HP limiter
 - New moves: [scrape(), analyzed_impale()]
@@ -31,9 +31,14 @@ Play it in the terminal!
 - Add more status effects
 - Improve modularization of abilities
 - Add held items
-- Add system to specify EVs (currently at 0 for all)
 - Make accuracy check do things other than return True
-
+- Add weather to calculations
+- Switch moves and abilities from CSV to JSON
+- Work in progress characters:
+    - LaabGai
+    - Halo-Halo
+    - Gangster Punk Lizard
+    - Forest Lizard
 
 ## How To Play ##
 Run battle.py in your terminal from this directory.
