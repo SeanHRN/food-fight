@@ -142,11 +142,9 @@ def move_drum_solo(user, target):
     TODO: The fighter switch system will need to be able to refresh this.
     '''
     if check_accuracy():
-        if "drum_soloed" in user:
-            if user["drum_soloed"] is True:
-                return [1,0,0]
-            else:
-                user["drum_soloed"] = True
+        if "drum_soloed" in user and user["drum_soloed"] is True:
+                return [0,0,0]
+        user["drum_soloed"] = True
         return [2,0,0]
     return [1,0,0]
 
