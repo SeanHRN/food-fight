@@ -4,27 +4,37 @@ import random
 import sys
 import csv
 import itertools
-#import battle
+import json
+
 
 moves_dict = {}
-if os.path.isfile("all_moves.csv"):
-    with open("all_moves.csv", newline='', encoding="UTF-8") as move_file:
-        reader_obj_moves = csv.reader(move_file)
-        for row in reader_obj_moves:
-            move_temp = {
-                "type"                     : row[1],
-                "category"                 : row[2],
-                "pp"                       : int(row[3]),
-                "power"                    : int(row[4]),
-                "accuracy"                 : int(row[5]),
-                "priority"                 : int(row[6]),
-                "instances"                : int(row[7]),
-                "effect_function"          : row[8],
-                "attr_makes_contact"       : bool(row[9]),
-                "attr_affected_by_protect" : bool(row[10]),
-                "description"              : row[11]
-            }
-            moves_dict[row[0]] = move_temp
+
+if os.path.isfile("moves.json"):
+    with open("moves.json", "r", encoding="UTF-8") as moves_file:
+        move_data = json.load(moves_file)
+        for move in move_data["moves"]:
+            move_temp = {}
+            for mkey, mvalue in move.items():
+                move_temp[mkey] = mvalue
+            moves_dict[move_temp["name"]] = move_temp
+#if os.path.isfile("all_moves.csv"):
+#    with open("all_moves.csv", newline='', encoding="UTF-8") as move_file:
+#        reader_obj_moves = csv.reader(move_file)
+#        for row in reader_obj_moves:
+#            move_temp = {
+#                "type"                     : row[1],
+#                "category"                 : row[2],
+#                "pp"                       : int(row[3]),
+#                "power"                    : int(row[4]),
+#                "accuracy"                 : int(row[5]),
+#                "priority"                 : int(row[6]),
+#                "instances"                : int(row[7]),
+#                "effect_function"          : row[8],
+#                "attr_makes_contact"       : bool(row[9]),
+#                "attr_affected_by_protect" : bool(row[10]),
+#                "description"              : row[11]
+#            }
+#            moves_dict[row[0]] = move_temp
 
 ### Helper Functions ###
 def check_can_be_poisoned(user, target):
@@ -124,6 +134,19 @@ def move_crunch(user, target):
     if check_accuracy():
         if random.random() < 0.2:
             target["curr_stage_phy_def"] -= 1
+        return [2,0,0]
+    return [1,0,0]
+
+def move_drum_solo(user, target):
+    '''
+    TODO: The fighter switch system will need to be able to refresh this.
+    '''
+    if check_accuracy():
+        if "drum_soloed" in user:
+            if user["drum_soloed"] is True:
+                return [1,0,0]
+            else:
+                user["drum_soloed"] = True
         return [2,0,0]
     return [1,0,0]
 

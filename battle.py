@@ -38,14 +38,11 @@ def do_turn(user, move, target):
 
     # Uses a loop so that multi-hit moves can work.
     elif moves.specific_moves.moves_dict[move]["category"] != "status":
-#        if target["state_protect"] is False:
         if moves.protect_check(user, move, target) is False:
             for _ in itertools.repeat(None, moves.specific_moves.moves_dict[move]["instances"]):
                 moves.calculate_interaction(move, user, target)
                 if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
                     return True
-        #else:
-        #    print(target["name"] + " protected itself!")
     return False
 
 def check_print_hp(fighter_a, fighter_b):
@@ -118,9 +115,9 @@ def do_battle(fighter_a, fighter_b):
             selected_move = ""
             sufficient_pp = False
             while selected_move not in f["moves"] and sufficient_pp is False:
-                print("Choose " + f["name"] + "'s Move: ", end=" ")
+                print("Choose " + f["name"] + "'s Move: \n", end="")
                 for num, m in enumerate(f["moves"]):
-                    print(str(num) + ": " + case_change(m) + "   -- [PP: " + str(f["pps"][num]) + "]   ", end="")
+                    print(str(num) + ": [ " + case_change(m) + " ]--[PP: " + str(f["pps"][num]) + "]\n", end="")
                 selected_move = input("\n")
                 if selected_move.isdigit() and int(selected_move) in range(4):
                     if f["pps"][int(selected_move)] == 0:
@@ -161,6 +158,7 @@ def do_battle(fighter_a, fighter_b):
 
         # Speed Check
         # 'if not', meaning: If this doesn't end the fight, keep going.
+        print("- - - - - - - - -")
         if goes_first == 'a':
             if not do_turn(fighter_a, fighter_a["queued_move"], fighter_b):
                 do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
@@ -174,6 +172,7 @@ def do_battle(fighter_a, fighter_b):
 
         for f in [fighter_a, fighter_b]:
             f["previous_move"] = f["queued_move"]
+        print("- - - - - - - - -")
 
 
 def determine_stats(f):
@@ -219,13 +218,12 @@ def determine_stats(f):
 
 
 def debug_print(fighter_a, fighter_b):
-    print("\n-- Fighters' Stats: --")
+    print("\n-- Fighters' Stats: --\n")
     for f in [fighter_a, fighter_b]:
         print(f["name"])
         for s in ["hp","phy_att","phy_def","spec_att","spec_def","speed"]:
             print(s + ": " + str(f[s]))
         print()
-    print("- - -")
 
 ### Start of the part that runs. ###
 

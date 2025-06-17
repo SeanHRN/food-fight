@@ -23,12 +23,6 @@ stage_multiplier_main_stats_dict = {
 major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
 minor_status_set = {"confuse", "infatuate"}
 dinu_moves_set = {"scrape()", "analyzed_impale()"}
-bypass_protect_set = set()
-
-if os.path.isfile("bypass_protect_moves.txt"):
-    with open("bypass_protect_moves.txt") as bpm:
-        for m in bpm:
-            bypass_protect_set.add(m)
 
 damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
@@ -72,12 +66,6 @@ if os.path.isfile("natures.json"):
                 nature_temp[nkey] = nvalue
             natures_dict[nature_temp["name"]] = nature
 
-# Testing
-#print(natures_dict)
-
-#class Moves:
-
-    #def __init__(self):
 
 def change_stage_main_stat(target, stat, change):
     if target[stat] == 6 and change > 0:
@@ -96,7 +84,7 @@ def protect_check(user, move, target):
     Situations where the move breaks the protect, or if the protect variant has
     additional effects, are handled in the individual move functions.
     '''
-    if (user["queued_move"] in bypass_protect_set) or \
+    if (specific_moves.moves_dict[user["queued_move"]]["attr_bypass_protect"] is True) or \
         (user["queued_move"] == "curse" and "ghost" in user["types"]):
         print("Protect bypassed!")
         return False
@@ -105,21 +93,6 @@ def protect_check(user, move, target):
         return True
     return False
 
-
-def type_interaction(move_type, target_type):
-    # Returns pair: 0: Interaction Value, 1: Interaction Message
-    try:
-        value = types_dict[move_type][target_type]
-    except KeyError:
-        value = 1
-    message = ""
-    if value == 2:
-        message = "It's super effective!"
-    elif value == 0.5:
-        message = "It's not very effective..."
-    elif value == 0:
-        message = "It had no effect."
-    return value, message
 
 def do_status_move(user, move):
     try:
@@ -135,16 +108,34 @@ def do_status_move(user, move):
     return
 
 def ability_check_category_1(user, target, move, move_power):
+    '''
+    Experimental / Work In Progress
+    Not general enough.
+    Currently works just for Technician.
+    '''
 
     try:
         ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
         if ability_function == "check_technician":
             curr_ability_function = getattr(abilities, ability_function)
-            return curr_ability_function(user, target, move, move_power) # currently works just for technician
+            return curr_ability_function(user, target, move, move_power)
     except KeyError:
         return move_power
 
     return move_power
+
+def check_ability_based_modifiers(move, user, target):
+    '''
+    Also experimental / work in progress
+    Not general enough.
+    Currently works just for Punk Rock.
+    '''
+    mod_user = 1
+    mod_target = 1
+    if "sound" in specific_moves.moves_dict[move]:
+        if user["ability"] == "punk rock":
+            mod_user, mod_target = abilities.check_punk_rock(user, target, specific_moves.moves_dict[move])
+    return mod_user, mod_target
 
 def calculate_interaction(move, user, target):
     damage = 0
@@ -190,8 +181,8 @@ def calculate_interaction(move, user, target):
 
     damage = (((user["level"] * 2) / 5) + 2) * move_power
     
-    damage = damage * (attack_stat/def_stat)
-    damage = damage / 50
+    damage *= (attack_stat/def_stat)
+    damage /= 50
 
 
     # User Burned
@@ -199,7 +190,7 @@ def calculate_interaction(move, user, target):
         damage = damage * 0.5
         print("Damage reduced because " + user["name"] + " is burned!")
 
-    #STAB
+    # STAB
     if specific_moves.moves_dict[move]["type"] in user["types"]:
         damage = damage * 1.5
 
@@ -207,7 +198,14 @@ def calculate_interaction(move, user, target):
     type_multiplier = 1.0
     for t in target["types"]:
         type_multiplier = type_multiplier * float(types_dict[specific_moves.moves_dict[move]["type"]][t])
-    damage = damage * type_multiplier
+    damage *= type_multiplier
+
+    # Ability-Based Modifiers
+    for d in check_ability_based_modifiers(move, user, target):
+        damage *= d
+
+
+    target["curr_hp"] -= int(damage)
 
     match type_multiplier:
         case 2.0:
@@ -216,6 +214,3 @@ def calculate_interaction(move, user, target):
             print("It's not very effective...")
         case 0:
             print("It had no effect!")
-
-
-    target["curr_hp"] -= int(damage)

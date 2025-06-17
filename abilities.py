@@ -25,7 +25,7 @@ def check_print_hp(fighterA, fighterB):
     print(fighterB["name"] + " HP: " + str(fighterB["curr_hp"]))
 
 def check_soup_burst(user, target):
-    if user["ability"] == "soup burst" and user["curr_hp"] <= (user["hp"]/2) and user["state_ability_activated"] is False:
+    if user["ability"].lower() == "soup burst" and user["curr_hp"] <= (user["hp"]/2) and user["state_ability_activated"] is False:
         user["state_ability_activated"] = True
         print(user["name"] + " bursted soup!")
         user["curr_stage_phy_att"] -= 2
@@ -43,3 +43,14 @@ def check_technician(user, target, move, move_power):
             print(user["name"] + "'s " + move.title() + " is boosted by Technician!")
             return move_power * 1.50
     return move_power
+
+def check_punk_rock(user, target, move):
+    val_user = 1
+    val_target = 1
+    if user["ability"].lower() == "punk rock":
+        val_user = 1.30
+        print("Damage boosted by Punk Rock!")
+    if target["ability"].lower() == "punk rock":
+        val_target = 0.5
+        print("Damage lowered by Punk Rock!")
+    return val_user, val_target
