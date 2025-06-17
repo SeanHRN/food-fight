@@ -23,6 +23,12 @@ stage_multiplier_main_stats_dict = {
 major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
 minor_status_set = {"confuse", "infatuate"}
 dinu_moves_set = {"scrape()", "analyzed_impale()"}
+bypass_protect_set = set()
+
+if os.path.isfile("bypass_protect_moves.txt"):
+    with open("bypass_protect_moves.txt") as bpm:
+        for m in bpm:
+            bypass_protect_set.add(m)
 
 damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
@@ -84,6 +90,20 @@ def change_stage_main_stat(target, stat, change):
             target[stat] = 6
         elif target[stat] < -6:
             target[stat] = -6
+
+def protect_check(user, move, target):
+    '''
+    Situations where the move breaks the protect, or if the protect variant has
+    additional effects, are handled in the individual move functions.
+    '''
+    if (user["queued_move"] in bypass_protect_set) or \
+        (user["queued_move"] == "curse" and "ghost" in user["types"]):
+        print("Protect bypassed!")
+        return False
+    if target["state_protect"] is True:
+        print(target["name"] + " protected itself!")
+        return True
+    return False
 
 
 def type_interaction(move_type, target_type):

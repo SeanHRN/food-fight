@@ -34,14 +34,7 @@ def check_soup_burst(user, target):
         user["curr_stage_spec_def"] -= 2
         user["curr_stage_speed"] -= 2
         print(user["name"] + "'s stats sharply decreased!")
-        moves.calculate_interaction("scald", user, target) #experimental
-        #specific_moves.move_scald(user, target)
-        #if specific_moves.check_accuracy():
-        #    if specific_moves.check_can_hit():
-        #        target["curr_hp"] -= 80
-        #        if target["status"] == "none":
-        #            target["status"] = "burn"
-        #            print(target["name"] + " is burned!")
+        moves.calculate_interaction("scald", user, target)
         check_print_hp(user, target)
 
 def check_technician(user, target, move, move_power):

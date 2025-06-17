@@ -38,19 +38,20 @@ def do_turn(user, move, target):
 
     # Uses a loop so that multi-hit moves can work.
     elif moves.specific_moves.moves_dict[move]["category"] != "status":
-        if target["state_protect"] is False:
+#        if target["state_protect"] is False:
+        if moves.protect_check(user, move, target) is False:
             for _ in itertools.repeat(None, moves.specific_moves.moves_dict[move]["instances"]):
                 moves.calculate_interaction(move, user, target)
                 if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
                     return True
-        else:
-            print(target["name"] + " protected itself!")
+        #else:
+        #    print(target["name"] + " protected itself!")
     return False
 
 def check_print_hp(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
-    for fighter in l:
-        print(fighter["name"] + " HP: " + str(fighter["curr_hp"]))
+    for f in l:
+        print(f["name"] + " HP: " + str(f["curr_hp"]))
 
 def check_print_status(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
@@ -63,14 +64,14 @@ def check_print_status(fighter_a, fighter_b):
 def check_round_start(fighter_a, fighter_b):
     #print("check round start")
     l = [fighter_a, fighter_b]
-    for fighter in l:
-        fighter["state_protect"] = False
+    for f in l:
+        f["state_protect"] = False
 
 
 def check_ability(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
-    for index,fighter in enumerate(l):
-        abilities.check_soup_burst(fighter, l[1-index])
+    for index,f in enumerate(l):
+        abilities.check_soup_burst(f, l[1-index])
 
 
 def check_round_middle(fighter_a, fighter_b):
@@ -110,19 +111,24 @@ def do_battle(fighter_a, fighter_b):
     #     7. Check the result.
     #
     while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
-
         print()
         check_round_start(fighter_a, fighter_b)
 
         for f in [fighter_a, fighter_b]:
             selected_move = ""
-            while selected_move not in f["moves"]:
+            sufficient_pp = False
+            while selected_move not in f["moves"] and sufficient_pp is False:
                 print("Choose " + f["name"] + "'s Move: ", end=" ")
                 for num, m in enumerate(f["moves"]):
-                    print(str(num) + ": " + case_change(m) + "  ", end="")
+                    print(str(num) + ": " + case_change(m) + "   -- [PP: " + str(f["pps"][num]) + "]   ", end="")
                 selected_move = input("\n")
                 if selected_move.isdigit() and int(selected_move) in range(4):
-                    selected_move = f["moves"][int(selected_move)]
+                    if f["pps"][int(selected_move)] == 0:
+                        print("\nThere's no PP left for this move!\n")
+                    else:
+                        f["pps"][int(selected_move)] -= 1
+                        selected_move = f["moves"][int(selected_move)]
+ 
             f["queued_move"] = selected_move
             print("[   " + case_change(selected_move) + "   ]\n")
             if selected_move != "protect": # Refresh Protect Counter
@@ -222,6 +228,7 @@ def debug_print(fighter_a, fighter_b):
     print("- - -")
 
 ### Start of the part that runs. ###
+
 BATTLE_CAN_HAPPEN = False
 roster = {}
 
@@ -256,7 +263,16 @@ if os.path.isfile("fighters.json"):
             fighter_temp["speed"] = 0
             determine_stats(fighter_temp)
 
+            # Start the moves with the pp from the moves dict.
+            # If the move is undefined, give it 10 pp.
+            for pp, m in zip(["pp_0", "pp_1", "pp_2", "pp_3"], ["move_0", "move_1", "move_2", "move_3"]):
+                try:
+                    fighter_temp[pp] = moves.specific_moves.moves_dict[fighter_temp[m]]["pp"]
+                except KeyError:
+                    fighter_temp[pp] = 10
+
             fighter_temp["moves"] = [fighter_temp["move_0"],fighter_temp["move_1"],fighter_temp["move_2"],fighter_temp["move_3"]]
+            fighter_temp["pps"] = [fighter_temp["pp_0"],fighter_temp["pp_1"],fighter_temp["pp_2"],fighter_temp["pp_3"]]
             roster[fighter_temp["id"]] = fighter_temp
         if fighter_data:
             BATTLE_CAN_HAPPEN = True
@@ -282,6 +298,7 @@ if BATTLE_CAN_HAPPEN:
 
     char_a = roster[select_a].copy()
     char_b = roster[select_b].copy()
+
 
     print("\n\n--------------\n")
 

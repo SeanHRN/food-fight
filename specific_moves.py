@@ -4,6 +4,7 @@ import random
 import sys
 import csv
 import itertools
+#import battle
 
 moves_dict = {}
 if os.path.isfile("all_moves.csv"):
@@ -42,9 +43,19 @@ def check_can_be_poisoned(user, target):
         case _:
             return 2
 
+def check_can_be_frozen(user, target):
+    #if battle.curr_weather == "harsh sunlight":
+    #    return False
+    if target["ability"] in ["magma armor", "comatose", "purifying salt"]:
+        return False
+    if target["status"] == "none" and "ice" not in target["types"]:
+        return True
+    else:
+        return False
+
+
 def check_accuracy():
     return True
-
 
 def print_stat_level_change(target, stats, levels): # levels before the change, not after
     # Use this only for the print statements. Do not make changes to the stats here.
@@ -69,6 +80,10 @@ def print_stat_level_change(target, stats, levels): # levels before the change, 
             if l <= -3:
                 print(target["name"] + "'s " + s  + " severely fell!")
 
+def self_thaw(user):
+    if user["status"] == "freeze":
+        user["status"] = "none"
+        print(user + " thawed out!")
 
 def print_status_effect(target, status, already):
     if not already:
@@ -79,6 +94,11 @@ def print_status_effect(target, status, already):
 
 def print_ability_protect(user):
     print(user["name"] + " is protected by " + user["ability"].title() + "!")
+
+def change_volatile_status_effect(target, status):
+    if target["status"] == "none":
+        target["status"] = status
+        print_status_effect(target,status, False)
 
 ### Attack/Contact Moves ###
 
@@ -91,13 +111,6 @@ def move_acid_spray(user, target):
         return [2,0,0]
     return [1,0,0]
 
-def move_crunch(user, target):
-    if check_accuracy():
-        if random.random() < 0.2:
-            target["curr_stage_phy_def"] -= 1
-        return [2,0,0]
-    return [1,0,0]
-
 def move_analyzed_impale(user, target):
     if check_accuracy():
         user["curr_hp"] -= int(user["hp"] / 16)
@@ -106,6 +119,13 @@ def move_analyzed_impale(user, target):
             return [2,2,1]
         return [2,1,1]
     return [1,1,1]
+
+def move_crunch(user, target):
+    if check_accuracy():
+        if random.random() < 0.2:
+            target["curr_stage_phy_def"] -= 1
+        return [2,0,0]
+    return [1,0,0]
 
 def move_heat_crash(user, target):
     # Python match-case doesn't have fall-through,
@@ -125,17 +145,21 @@ def move_heat_crash(user, target):
                 return [2,120,0]
     return [1,0,0]
 
+def move_ice_punch(user, target):
+    if check_accuracy():
+        if random.random() < 0.1:
+            change_volatile_status_effect(target, "freeze")
+        return [2,0,0]
+    return [1,0,0]
+
 def move_lunge(user, target):
     if check_accuracy():
         target["curr_stage_phy_att"] -= 1
         return [2,0,0]
     return [1,0,0]
 
-
 def move_scald(user, target):
-    if user["status"] == "frozen":
-        user["status"] = "none"
-        print(user["name"] + " thawed!")
+    self_thaw(user)
     if check_accuracy():
         if random.random() < 0.3:
             target["status"] = "burn"
@@ -144,14 +168,10 @@ def move_scald(user, target):
     else:
         return [1,0,0]
 
-
-
 def move_sludge_bomb(user, target):
     if check_accuracy():
         if random.random() < 0.3:
-            if target["status"] == "none":
-                target["status"] = "poison"
-                print_status_effect(target,"poison", False)
+            change_volatile_status_effect(target, "poison")
         return [2,0,0]
     return [1,0,0]
 
@@ -217,7 +237,8 @@ def move_protect(user):
     if user["count_protect"] == 1:
         allow_protect = True
     else:
-        chance = 0.333 * user["count_protect"]
+        chance = 1/(3**user["count_protect"])
+        #print("chance: " + str(chance))
         if random.random() < chance:
             allow_protect = True
         else:
