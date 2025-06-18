@@ -10,9 +10,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_analyzed_impale",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The user sends out a piece of its body to pierce the opponent. If the opponent is poisoned, this move deals double damage. This also damages the user a little.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "autotomize",
@@ -24,9 +24,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_autotomize",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "The user sheds part of its body to make itself lighter and sharply raise its Speed stat.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "blank attack",
@@ -38,9 +38,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "none",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "This attack deals no damage!",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "crunch",
@@ -52,9 +52,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_crunch",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The user crunches up the target with sharp fangs. This may also lower the target's Defense stat.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "heat crash",
@@ -66,9 +66,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_heat_crash",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "jet punch",
@@ -80,9 +80,9 @@
         "priority" : 1,
         "instances" : 1,
         "effect_function" : "none",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The user summons a torrent around its fist and punches at blinding speed. This move always goes first.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "leaf blade",
@@ -94,9 +94,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "none",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The user handles a sharp leaf like a sword and cuts the target to inflict damage. This move has a heightened chance of landing a critical hit.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "lunge",
@@ -108,23 +108,23 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_lunge",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The user makes a lunge at the target, attacking with full force. This also lowers the target's Attack stat.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "protect",
-        "type"     : "status",
-        "category" : "normal",
+        "type"     : "normal",
+        "category" : "status",
         "pp"       : 16,
         "power"    : 0,
         "accuracy" : 0,
         "priority" : 4,
         "instances" : 1,
         "effect_function" : "move_protect",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "This move enables the user to protect itself from all attacks. Its chance of failing rises if it is used in succession.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "rice shuriken",
@@ -136,9 +136,23 @@
         "priority" : 1,
         "instances" : 3,
         "effect_function" : "none",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "The user hits the target with throwing stars three times in a row. This move always goes first.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
+    },
+    {
+        "name" : "scald",
+        "type" : "water",
+        "category" : "special",
+        "pp" : 24,
+        "power" : 80,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_scald",
+        "attr_makes_contact" : false,
+        "description" : "The user attacks by shooting boiling hot water at the target. This may also leave the target with a burn.",
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "scrape()",
@@ -150,9 +164,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_scrape",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The user invades and analyzes the opponent with its blood, sharply raising its special attack, lowering its defense and special defense, and poisoning the opponent.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "sludge bomb",
@@ -164,9 +178,24 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_sludge_bomb",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "The user hurls unsanitary sludge at the target to inflict damage. This may also poison the target.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
+    },
+    {
+        "name" : "mach punch",
+        "type" : "fighting",
+        "category" : "physical",
+        "pp" : 48,
+        "power" : 40,
+        "accuracy" : 100,
+        "priority" : 1,
+        "instances" : 1,
+        "effect_function" : "none",
+        "attr_makes_contact" : true,
+        "description" : "The user throws a punch at blinding speed. This move always goes first.",
+        "attr_bypass_protect" : false
+
     },
     {
         "name"     : "sucker punch",
@@ -178,9 +207,9 @@
         "priority" : 1,
         "instances" : 1,
         "effect_function" : "move_sucker_punch",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "This move enables the user to attack first. This move fails if the target is not readying an attack.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "acid spray",
@@ -192,9 +221,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_acid_spray",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "The user attacks by spitting fluid that works to melt the target. This also harshly lowers the target's Sp. Def stat.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "dragon dance",
@@ -206,9 +235,23 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_dragon_dance",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "The user vigorously performs a mystic, powerful dance that boosts its Attack and Speed stats.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
+    },
+    {
+        "name"     : "belly drum",
+        "type"     : "normal",
+        "category" : "status",
+        "pp"       : 16,
+        "power"    : 0,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_belly_drum",
+        "attr_makes_contact" : false,
+        "description" : "The user maximizes its Attack stat but loses HP equal to half its max HP.",
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "ice punch",
@@ -220,9 +263,9 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "move_ice_punch",
-        "attr_makes_contact" : "True",
+        "attr_makes_contact" : true,
         "description" : "The target is attacked with an icy punch. This may also leave the target frozen.",
-        "attr_bypass_protect" : "False"
+        "attr_bypass_protect" : false
     },
     {
         "name"     : "boomburst",
@@ -234,10 +277,10 @@
         "priority" : 0,
         "instances" : 1,
         "effect_function" : "none",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : false,
         "description" : "The user attacks everything around it with the destructive power of a terrible explosive sound.",
-        "attr_bypass_protect" : "False",
-        "sound" : "True"
+        "attr_bypass_protect" : false,
+        "attr_sound" : true
     },
     {
         "name"     : "drum solo",
@@ -249,10 +292,24 @@
         "priority" : 2,
         "instances" : 1,
         "effect_function" : "move_drum_solo",
-        "attr_makes_contact" : "False",
+        "attr_makes_contact" : true,
         "description" : "The user punches and kicks the opponent at blistering speed. It works only once when the user is in battle.",
-        "attr_bypass_protect" : "False",
-        "sound" : "True"
+        "attr_bypass_protect" : false,
+        "attr_sound" : true
+    },
+    {
+        "name"     : "u-turn",
+        "type"     : "bug",
+        "category" : "physical",
+        "pp"       : 32,
+        "power"    : 70,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_u_turn",
+        "attr_makes_contact" : true,
+        "description" : "After making its attack, the user rushes back to switch places with a party monster in waiting.",
+        "attr_bypass_protect" : false
     }
 
 ]

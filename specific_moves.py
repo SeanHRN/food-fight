@@ -233,6 +233,13 @@ def move_toxic(user, target):
         return [3,0,0]
     return [1,0,0]
 
+def move_u_turn(user, target):
+    '''
+    Properly fill this in when the team system is working.
+    '''
+    if check_accuracy():
+        return [2,0,0]
+    return [1,0,0]
 
 # Status Moves
 
@@ -242,6 +249,11 @@ def move_autotomize(user):
     user["weight"] -= 100.0
     if user["weight"] < 0.1:
         user["weight"] = 0.1
+
+def move_belly_drum(user):
+    print_stat_level_change(user, ["phy_att"], [6])
+    user["curr_hp"] *= 0.5
+    user["curr_stage_phy_att"] = 6
 
 def move_dragon_dance(user):
     print_stat_level_change(user, ["phy_att", "speed"], [1, 1])

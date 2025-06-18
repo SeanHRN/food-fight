@@ -27,15 +27,19 @@ def check_print_hp(fighterA, fighterB):
 def check_soup_burst(user, target):
     if user["ability"].lower() == "soup burst" and user["curr_hp"] <= (user["hp"]/2) and user["state_ability_activated"] is False:
         user["state_ability_activated"] = True
+        user["curr_stage_phy_att"] -= 3
+        user["curr_stage_phy_def"] -= 3
+        user["curr_stage_spec_att"] -= 3
+        user["curr_stage_spec_def"] -= 3
+        user["curr_stage_speed"] -= 3
+        print(user["name"] + "'s stats harshly decreased!")
         print(user["name"] + " bursted soup!")
-        user["curr_stage_phy_att"] -= 2
-        user["curr_stage_phy_def"] -= 2
-        user["curr_stage_spec_att"] -= 2
-        user["curr_stage_spec_def"] -= 2
-        user["curr_stage_speed"] -= 2
-        print(user["name"] + "'s stats sharply decreased!")
-        moves.calculate_interaction("scald", user, target)
-        check_print_hp(user, target)
+        if specific_moves.moves_dict[target["queued_move"]]["attr_makes_contact"] is True:
+            moves.calculate_interaction("scald", user, target)
+            check_print_hp(user, target)
+        else:
+            print(target["name"] + " avoided the soup!")
+
 
 def check_technician(user, target, move, move_power):
     if user["ability"].lower() == "technician":
@@ -47,10 +51,11 @@ def check_technician(user, target, move, move_power):
 def check_punk_rock(user, target, move):
     val_user = 1
     val_target = 1
-    if user["ability"].lower() == "punk rock":
-        val_user = 1.30
-        print("Damage boosted by Punk Rock!")
-    if target["ability"].lower() == "punk rock":
-        val_target = 0.5
-        print("Damage lowered by Punk Rock!")
+    if "attr_sound" in specific_moves.moves_dict[move] and specific_moves.moves_dict[move]["attr_sound"]:
+        if user["ability"].lower() == "punk rock":
+            val_user = 1.30
+            print("Damage boosted by Punk Rock!")
+        if target["ability"].lower() == "punk rock":
+            val_target = 0.5
+            print("Damage lowered by Punk Rock!")
     return val_user, val_target

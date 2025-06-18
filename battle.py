@@ -24,16 +24,14 @@ def do_turn(user, move, target):
     # By using check_round_middle,
     # returns False: Target is not out of HP
     # returns True:  Target is out of HP. The fight is over.
-    print()
-    print("--------------")
-    print(user["name"] + " used " + case_change(move) + "!")
-    print()
+    print("\n--------------")
+    print(user["name"] + " used " + case_change(move) + "!\n")
 
     if not move in moves.specific_moves.moves_dict:
         print("\"" + move + "\"" + " was not found!")
         return False
 
-    elif moves.specific_moves.moves_dict[move]["category"] == "status":
+    if moves.specific_moves.moves_dict[move]["category"] == "status":
         moves.do_status_move(user, move)
 
     # Uses a loop so that multi-hit moves can work.
@@ -74,10 +72,9 @@ def check_ability(fighter_a, fighter_b):
 def check_round_middle(fighter_a, fighter_b):
     check_print_hp(fighter_a, fighter_b)
     check_ability(fighter_a, fighter_b)
-
-    if fighter_a["curr_hp"] <= 0 or fighter_b["curr_hp"] <= 0:
-        print("The fight is over.\n\n")
-
+    for f in [fighter_a, fighter_b]:
+        if f["curr_hp"] <= 0:
+            print("\n" + f["name"] + " fainted!")
     return fighter_a["curr_hp"] <= 0 or fighter_b["curr_hp"] <= 0
 
 def check_round_end(fighter_a, fighter_b):
@@ -111,7 +108,8 @@ def do_battle(fighter_a, fighter_b):
         print()
         check_round_start(fighter_a, fighter_b)
 
-        for f in [fighter_a, fighter_b]:
+        turn_priority = {"a" : 0, "b" : 0}
+        for index, f in enumerate([fighter_a, fighter_b]):
             selected_move = ""
             sufficient_pp = False
             while selected_move not in f["moves"] and sufficient_pp is False:
@@ -130,24 +128,22 @@ def do_battle(fighter_a, fighter_b):
             print("[   " + case_change(selected_move) + "   ]\n")
             if selected_move != "protect": # Refresh Protect Counter
                 f["count_protect"] = 0
+            try:
+                pri = int(moves.specific_moves.moves_dict[f["queued_move"]]["priority"])
+            except KeyError:
+                pri = 0
+            if index == 0:
+                turn_priority["a"] = pri
+            else:
+                turn_priority["b"] = pri
 
-        try:
-            priority_a = int(moves.specific_moves.moves_dict[fighter_a["queued_move"]]["priority"])
-        except KeyError:
-            print("Priority for " + case_change(fighter_a["queued_move"]) + " not found. Using default.")
-            priority_a = 0
-        try:
-            priority_b = int(moves.specific_moves.moves_dict[fighter_b["queued_move"]]["priority"])
-        except KeyError:
-            print("Priority for " + case_change(fighter_b["queued_move"]) + " not found. Using default.")
-            priority_b = 0
         goes_first = 'a'
 
 
         # Priority Check
-        if priority_a < priority_b:
+        if turn_priority["a"] < turn_priority["b"]:
             goes_first = 'b'
-        if priority_a == priority_b:
+        if turn_priority["a"] == turn_priority["b"]:
             speed_mult_a = moves.stage_multiplier_main_stats_dict[fighter_a["curr_stage_speed"]]
             speed_mult_b = moves.stage_multiplier_main_stats_dict[fighter_b["curr_stage_speed"]]
             if fighter_a["speed"] * speed_mult_a < fighter_b["speed"] * speed_mult_b:

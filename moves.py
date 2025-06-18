@@ -3,6 +3,7 @@ import csv
 import os.path
 import specific_moves
 import abilities
+import random
 
 stage_multiplier_main_stats_dict = {
     -6: 2/8,
@@ -95,16 +96,16 @@ def protect_check(user, move, target):
 
 
 def do_status_move(user, move):
-    try:
-        move_function = specific_moves.moves_dict[move]["effect_function"]
-        if move_function != "none":
-            move_function = getattr(specific_moves, move_function)
-            move_function(user)
-            return
-        else:
-            print("DEBUG: effect_function set to 'none'")
-    except KeyError:
-        print("Move not found!")
+    #print("jojo")
+    #print(specific_moves.moves_dict[move]["effect_function"])
+    #try:
+    move_function = specific_moves.moves_dict[move]["effect_function"]
+    if move_function != "none":
+        move_function = getattr(specific_moves, move_function)
+        move_function(user)
+        #return
+    #except KeyError:
+    #    print("Move Function for " + move + " not found!")
     return
 
 def ability_check_category_1(user, target, move, move_power):
@@ -132,15 +133,43 @@ def check_ability_based_modifiers(move, user, target):
     '''
     mod_user = 1
     mod_target = 1
-    if "sound" in specific_moves.moves_dict[move]:
-        if user["ability"] == "punk rock":
-            mod_user, mod_target = abilities.check_punk_rock(user, target, specific_moves.moves_dict[move])
+    if user["ability"] == "punk rock" or target["ability"] == "punk rock":
+        mod_user, mod_target = abilities.check_punk_rock(user, target, move)
     return mod_user, mod_target
+
+
+def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
+    '''
+    For unusual moves that break the usual physical/special stat interations.
+    Return the [attack, defense] to use.
+
+    Shell Side Arm: The only modifiers used are stat stages.
+                    In a tie, it's a random pick.
+    '''
+    if move.lower() in ["psyshock", "psystrike", "secret sword"]:
+        return spec_a, phy_d
+    if move.lower() == "shell side arm":
+        forecast_phy_att = stage_multiplier_main_stats_dict[user["curr_stage_phy_att"]] * user["phy_att"]
+        forecast_spec_att = stage_multiplier_main_stats_dict[user["curr_stage_spec_att"]] * user["spec_att"]
+
+        if (forecast_phy_att/phy_d) > (forecast_spec_att/spec_d):
+            return phy_a, phy_d
+        elif (forecast_phy_att/phy_d) < (forecast_spec_att/spec_d):
+            return spec_a, spec_d
+        else:
+            if random.random() < 0.5:
+                return phy_a, phy_d
+            else:
+                return spec_a, spec_d
+    # Default
+    if specific_moves.moves_dict[move]["category"] == "physical":
+        return phy_a, phy_d
+    else:
+        return spec_a, spec_d
 
 def calculate_interaction(move, user, target):
     damage = 0
     move_power = specific_moves.moves_dict[move]["power"]
-
     # Irregular Effect
     move_function = specific_moves.moves_dict[move]["effect_function"]
 
@@ -166,22 +195,30 @@ def calculate_interaction(move, user, target):
         else: # result[0] == 3
             return
 
+
+
     # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
     move_power = ability_check_category_1(user, target, move, move_power)
 
-
     # Offense and Defense Stats
-    if specific_moves.moves_dict[move]["category"] == "physical":
-        attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
-        def_stat = target["phy_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_phy_def"])]
-    else:
-        attack_stat = user["spec_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_spec_att"])]
-        def_stat = target["spec_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_spec_def"])]
+    phy_attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
+    phy_def_stat = target["phy_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_phy_def"])]
+    spec_attack_stat = user["spec_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_spec_att"])]
+    spec_def_stat = target["spec_def"] * stage_multiplier_main_stats_dict[float(target["curr_stage_spec_def"])]
 
+    if specific_moves.moves_dict[move]["category"] == "physical":
+        attack_stat_to_use = phy_attack_stat
+        def_stat_to_use = phy_def_stat
+    else:
+        attack_stat_to_use = spec_attack_stat
+        def_stat_to_use = spec_def_stat
+
+    attack_stat_to_use, def_stat_to_use = \
+        unusual_damage_stat_to_use_check(user, move, phy_attack_stat, spec_attack_stat, phy_def_stat, spec_def_stat)
 
     damage = (((user["level"] * 2) / 5) + 2) * move_power
     
-    damage *= (attack_stat/def_stat)
+    damage *= (attack_stat_to_use/def_stat_to_use)
     damage /= 50
 
 
