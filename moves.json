@@ -226,6 +226,20 @@
         "attr_bypass_protect" : false
     },
     {
+        "name" : "aqua jet",
+        "type"     : "water",
+        "category" : "physical",
+        "pp"       : 32,
+        "power"    : 40,
+        "accuracy" : 100,
+        "priority" : 1,
+        "instances" : 1,
+        "effect_function" : "none",
+        "attr_makes_contact" : true,
+        "description" : "The user lunges at the target to inflict damage, moving at blinding speed. This move always goes first.",
+        "attr_bypass_protect" : false
+    },
+    {
         "name"     : "dragon dance",
         "type"     : "dragon",
         "category" : "status",
@@ -251,6 +265,34 @@
         "effect_function" : "move_belly_drum",
         "attr_makes_contact" : false,
         "description" : "The user maximizes its Attack stat but loses HP equal to half its max HP.",
+        "attr_bypass_protect" : false
+    },
+    {
+        "name"     : "chilling water",
+        "type"     : "water",
+        "category" : "special",
+        "pp"       : 32,
+        "power"    : 50,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_chilling_water",
+        "attr_makes_contact" : false,
+        "description" : "The user attacks the target by showering it with water that's so cold it saps the target's power. This also lowers the target's Attack stat.",
+        "attr_bypass_protect" : false
+    },
+    {
+        "name" : "hydro pump",
+        "type"     : "water",
+        "category" : "special",
+        "pp"       : 8,
+        "power"    : 110,
+        "accuracy" : 80,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "none",
+        "attr_makes_contact" : false,
+        "description" : "The target is blasted by a huge volume of water launched under great pressure.",
         "attr_bypass_protect" : false
     },
     {

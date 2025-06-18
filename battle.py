@@ -239,6 +239,8 @@ if os.path.isfile("fighters.json"):
             fighter_temp["curr_stage_spec_att"] = 0
             fighter_temp["curr_stage_spec_def"] = 0
             fighter_temp["curr_stage_speed"] = 0
+            fighter_temp["curr_stage_accuracy"] = 0
+            fighter_temp["curr_stage_evasion"] = 0
             fighter_temp["state_protect"] = False
             fighter_temp["state_ability_activated"] = False
             fighter_temp["status"] = "none"

@@ -64,8 +64,12 @@ def check_can_be_frozen(user, target):
         return False
 
 
-def check_accuracy():
-    return True
+def check_accuracy(move_accuracy):
+    if random.random() < move_accuracy / 100:
+        return True
+    else:
+        print("It missed!")
+        return False
 
 def print_stat_level_change(target, stats, levels): # levels before the change, not after
     # Use this only for the print statements. Do not make changes to the stats here.
@@ -113,7 +117,7 @@ def change_volatile_status_effect(target, status):
 ### Attack/Contact Moves ###
 
 def move_acid_spray(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["acid spray"]["accuracy"]):
         if target["ability"] == "bulletproof":
             print_ability_protect(target)
             return [3,0,0]
@@ -122,16 +126,24 @@ def move_acid_spray(user, target):
     return [1,0,0]
 
 def move_analyzed_impale(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["analyzed_impale()"]["accuracy"]):
         user["curr_hp"] -= int(user["hp"] / 16)
+        print(user["name"] + " was damaged throwing its body!")
         if target["status"] == "poisoned":
             print("analyzed_impale() is boosted with poison!")
             return [2,2,1]
         return [2,1,1]
-    return [1,1,1]
+    return [1,0,0]
+
+def move_chilling_water(user, target):
+    if check_accuracy(moves_dict["chilling_ ater"]["accuracy"]):
+        target["curr_stage_phy_att"] -= 1
+        print_stat_level_change(target, ["phy_att"], [-1])
+        return [2,0,0]
+    return [1,0,0]
 
 def move_crunch(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["crunch"]["accuracy"]):
         if random.random() < 0.2:
             target["curr_stage_phy_def"] -= 1
         return [2,0,0]
@@ -141,7 +153,8 @@ def move_drum_solo(user, target):
     '''
     TODO: The fighter switch system will need to be able to refresh this.
     '''
-    if check_accuracy():
+    #if check_accuracy(moves_dict["drum solo"]["accuracy"]):
+    if check_accuracy(0):
         if "drum_soloed" in user and user["drum_soloed"] is True:
                 return [0,0,0]
         user["drum_soloed"] = True
@@ -151,7 +164,7 @@ def move_drum_solo(user, target):
 def move_heat_crash(user, target):
     # Python match-case doesn't have fall-through,
     # so there are no explicit breaks.
-    if check_accuracy():
+    if check_accuracy(moves_dict["heat crash"]["accuracy"]):
         percentage = target["weight"] / user["weight"]
         match percentage:
             case _ if percentage > 0.5:
@@ -167,21 +180,21 @@ def move_heat_crash(user, target):
     return [1,0,0]
 
 def move_ice_punch(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["ice punch"]["accuracy"]):
         if random.random() < 0.1:
             change_volatile_status_effect(target, "freeze")
         return [2,0,0]
     return [1,0,0]
 
 def move_lunge(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["lunge"]["accuracy"]):
         target["curr_stage_phy_att"] -= 1
         return [2,0,0]
     return [1,0,0]
 
 def move_scald(user, target):
     self_thaw(user)
-    if check_accuracy():
+    if check_accuracy(moves_dict["scald"]["accuracy"]):
         if random.random() < 0.3:
             target["status"] = "burn"
             print(target["name"] + " is burned!")
@@ -190,21 +203,21 @@ def move_scald(user, target):
         return [1,0,0]
 
 def move_sludge_bomb(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["sludge bomb"]["accuracy"]):
         if random.random() < 0.3:
             change_volatile_status_effect(target, "poison")
         return [2,0,0]
     return [1,0,0]
 
 def move_sucker_punch(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["sucker punch"]["accuracy"]):
         if moves_dict[target["queued_move"]]["category"] != "status":
             return [2,0,0]
         else:
             return [0,0,0]
 
 def move_scrape(user, target):
-    if check_accuracy():
+    if check_accuracy(moves_dict["scrape()"]["accuracy"]):
         poison_reason = check_can_be_poisoned(user, target)
         if poison_reason == 0:
             target["status"] = "poison"
@@ -223,7 +236,7 @@ def move_scrape(user, target):
 
 def move_toxic(user, target):
     # Toxic specifically sets the badly poison level to 1.
-    if check_accuracy():
+    if check_accuracy(moves_dict["toxic"]["accuracy"]):
         if check_can_be_poisoned(user, target) != 0:
             print("It had no effect!")
         else:
@@ -237,7 +250,7 @@ def move_u_turn(user, target):
     '''
     Properly fill this in when the team system is working.
     '''
-    if check_accuracy():
+    if check_accuracy(moves_dict["u-turn"]["accuracy"]):
         return [2,0,0]
     return [1,0,0]
 
@@ -252,6 +265,7 @@ def move_autotomize(user):
 
 def move_belly_drum(user):
     print_stat_level_change(user, ["phy_att"], [6])
+    print(user["name"] + "'s HP went down!")
     user["curr_hp"] *= 0.5
     user["curr_stage_phy_att"] = 6
 

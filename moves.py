@@ -185,7 +185,6 @@ def calculate_interaction(move, user, target):
             print("It failed!")
             return
         elif result[0] == 1:
-            print("It missed!")
             return
         elif result[0] == 2:
             if result[2] == 0:
@@ -194,7 +193,9 @@ def calculate_interaction(move, user, target):
                 move_power *= result[1]
         else: # result[0] == 3
             return
-
+    else: # Basic attack; just do the accuracy check.
+        if specific_moves.check_accuracy(specific_moves.moves_dict[move]["accuracy"]) is False:
+            return
 
 
     # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
