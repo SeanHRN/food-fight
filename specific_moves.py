@@ -71,6 +71,7 @@ def check_accuracy(move_accuracy):
         print("It missed!")
         return False
 
+
 def print_stat_level_change(target, stats, levels): # levels before the change, not after
     # Use this only for the print statements. Do not make changes to the stats here.
 
@@ -89,10 +90,30 @@ def print_stat_level_change(target, stats, levels): # levels before the change, 
                 print(target["name"] + "'s " + s  + " can't go any lower!")
             elif l == -1:
                 print(target["name"] + "'s " + s  + " fell!")
-            if l == -2:
+            elif l == -2:
                 print(target["name"] + "'s " + s  + " harshly fell!")
-            if l <= -3:
+            elif l <= -3:
                 print(target["name"] + "'s " + s  + " severely fell!")
+
+def change_stats(target, stats, levels):
+    '''
+    Use this to validate the math for a stat change.
+    '''
+    capped_levels = []
+    for s, l in zip(stats, levels):
+        current_stage = target["curr_stage_" + s]
+        proposed_change = current_stage + l
+        final_change = proposed_change
+        if proposed_change < -6:
+            final_change = -6
+        elif proposed_change > 6:
+            final_change = 6
+        #print("final_change: " + str(final_change))
+        target["curr_stage_" + s] = final_change
+        capped_levels.append(final_change)
+    
+    print_stat_level_change(target, stats, capped_levels)
+
 
 def self_thaw(user):
     if user["status"] == "freeze":
@@ -104,7 +125,6 @@ def print_status_effect(target, status, already):
         print(target["name"] + " is " + status + "ed!")
     else:
         print(target["name"] + " is already " + status + "ed!")
-
 
 def print_ability_protect(user):
     print(user["name"] + " is protected by " + user["ability"].title() + "!")
@@ -136,16 +156,15 @@ def move_analyzed_impale(user, target):
     return [1,0,0]
 
 def move_chilling_water(user, target):
-    if check_accuracy(moves_dict["chilling_ ater"]["accuracy"]):
-        target["curr_stage_phy_att"] -= 1
-        print_stat_level_change(target, ["phy_att"], [-1])
+    if check_accuracy(moves_dict["chilling water"]["accuracy"]):
+        change_stats(target, ["phy_att"], [-1])
         return [2,0,0]
     return [1,0,0]
 
 def move_crunch(user, target):
     if check_accuracy(moves_dict["crunch"]["accuracy"]):
         if random.random() < 0.2:
-            target["curr_stage_phy_def"] -= 1
+            change_stats(target, ["phy_def"], [-1])
         return [2,0,0]
     return [1,0,0]
 
@@ -153,8 +172,7 @@ def move_drum_solo(user, target):
     '''
     TODO: The fighter switch system will need to be able to refresh this.
     '''
-    #if check_accuracy(moves_dict["drum solo"]["accuracy"]):
-    if check_accuracy(0):
+    if check_accuracy(moves_dict["drum solo"]["accuracy"]):
         if "drum_soloed" in user and user["drum_soloed"] is True:
                 return [0,0,0]
         user["drum_soloed"] = True
@@ -188,7 +206,10 @@ def move_ice_punch(user, target):
 
 def move_lunge(user, target):
     if check_accuracy(moves_dict["lunge"]["accuracy"]):
-        target["curr_stage_phy_att"] -= 1
+        change_stats(target, ["phy_att"], [-1])
+        #if check_can_change_stat(target, "phy_att", -1):
+        #    target["curr_stage_phy_att"] -= 1
+        #    print_stat_level_change(target, ["phy_att"], [-1])
         return [2,0,0]
     return [1,0,0]
 
@@ -225,17 +246,16 @@ def move_scrape(user, target):
         elif poison_reason == 3:
             print_status_effect(target,"poison", True)
         if poison_reason in [0,3]:
-            print_stat_level_change(user, ["spec_att", "phy_def", "spec_def"], [2, -1, -1])
-            user["curr_stage_spec_att"] += 2
-            user["curr_stage_phy_def"] -= 1
-            user["curr_stage_spec_def"] -= 1
+            change_stats(user, ["spec_att","phy_def","spec_def"], [2,-1,-1])
         elif poison_reason in [1,2]:
             return[0,0,0]
         return[3,0,0]
     return [1,0,0]
 
 def move_toxic(user, target):
-    # Toxic specifically sets the badly poison level to 1.
+    '''
+    Toxic specifically sets the badly poison level to 1.
+    '''
     if check_accuracy(moves_dict["toxic"]["accuracy"]):
         if check_can_be_poisoned(user, target) != 0:
             print("It had no effect!")
@@ -257,8 +277,7 @@ def move_u_turn(user, target):
 # Status Moves
 
 def move_autotomize(user):
-    print_stat_level_change(user, ["speed"], [2])
-    user["curr_stage_speed"] += 2
+    change_stats(user, ["speed"], [2])
     user["weight"] -= 100.0
     if user["weight"] < 0.1:
         user["weight"] = 0.1
@@ -270,9 +289,7 @@ def move_belly_drum(user):
     user["curr_stage_phy_att"] = 6
 
 def move_dragon_dance(user):
-    print_stat_level_change(user, ["phy_att", "speed"], [1, 1])
-    user["curr_stage_phy_att"] += 1
-    user["curr_stage_speed"] += 1
+    change_stats(user, ["phy_att", "speed"], [1, 1])
 
 def move_protect(user):
     '''

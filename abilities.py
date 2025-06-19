@@ -27,13 +27,9 @@ def check_print_hp(fighterA, fighterB):
 def check_soup_burst(user, target):
     if user["ability"].lower() == "soup burst" and user["curr_hp"] <= (user["hp"]/2) and user["state_ability_activated"] is False:
         user["state_ability_activated"] = True
-        user["curr_stage_phy_att"] -= 3
-        user["curr_stage_phy_def"] -= 3
-        user["curr_stage_spec_att"] -= 3
-        user["curr_stage_spec_def"] -= 3
-        user["curr_stage_speed"] -= 3
-        print(user["name"] + "'s stats harshly decreased!")
         print(user["name"] + " bursted soup!")
+        specific_moves.change_stats(user, ["phy_att","phy_def","spec_att","spec_def","speed"], [-3,-3,-3,-3,-3])
+
         if specific_moves.moves_dict[target["queued_move"]]["attr_makes_contact"] is True:
             moves.calculate_interaction("scald", user, target)
             check_print_hp(user, target)

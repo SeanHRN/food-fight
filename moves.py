@@ -235,7 +235,7 @@ def calculate_interaction(move, user, target):
     # Type Effectiveness
     type_multiplier = 1.0
     for t in target["types"]:
-        type_multiplier = type_multiplier * float(types_dict[specific_moves.moves_dict[move]["type"]][t])
+        type_multiplier *= float(types_dict[specific_moves.moves_dict[move]["type"]][t])
     damage *= type_multiplier
 
     # Ability-Based Modifiers
@@ -246,7 +246,7 @@ def calculate_interaction(move, user, target):
     target["curr_hp"] -= int(damage)
 
     match type_multiplier:
-        case 2.0:
+        case 2.0 | 4.0:
             print("It's super effective!")
         case 0.5:
             print("It's not very effective...")
