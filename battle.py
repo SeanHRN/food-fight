@@ -8,6 +8,7 @@ import json
 import moves
 import specific_moves
 import abilities
+import re
 sys.path.append(os.getcwd())
 
 
@@ -17,9 +18,9 @@ def case_change(move):
     else:
         return move.title()
 
-def test_character(fighter):
-    print(fighter["curr_hp"])
-    print(fighter["move_0"])
+def test_character(f):
+    print(f["curr_hp"])
+    print(f["move_0"])
 
 def do_turn(user, move, target):
     # By using check_round_middle,
@@ -51,10 +52,10 @@ def check_print_hp(fighter_a, fighter_b):
 
 def check_print_status(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
-    for fighter in l:
-        if fighter["status"]:
-            print("Status effect(s) on " + fighter["name"] + ": ", end="")
-            for s in fighter["status"]:
+    for f in l:
+        if f["status"]:
+            print("Status effect(s) on " + f["name"] + ": ", end="")
+            for s in f["status"]:
                 print(s)
 
 def check_round_start(fighter_a, fighter_b):
@@ -62,7 +63,6 @@ def check_round_start(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
     for f in l:
         f["state_protect"] = False
-
 
 def check_ability(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
@@ -115,7 +115,7 @@ def do_battle(fighter_a, fighter_b):
             selected_move = ""
             sufficient_pp = False
             while selected_move not in f["moves"] and sufficient_pp is False:
-                print("Choose " + f["name"] + "'s Move: \n", end="")
+                print("\nChoose " + f["name"] + "'s Move: \n", end="")
                 longest_name_length = len(max(f["moves"], key=len))
                 longest_type_length = 0
                 for m in f["moves"]:
@@ -136,7 +136,10 @@ def do_battle(fighter_a, fighter_b):
                     else:
                         f["pps"][int(selected_move)] -= 1
                         selected_move = f["moves"][int(selected_move)]
- 
+
+                is_info_call = bool(re.search(r'[0-3][i,info,d,desc,description]', selected_move))
+                if is_info_call:
+                    print("\n" + specific_moves.moves_dict[m]["description"] + "\n")
             f["queued_move"] = selected_move
             print("[   " + case_change(selected_move) + "   ]\n")
             if selected_move != "protect": # Refresh Protect Counter
@@ -284,14 +287,19 @@ if os.path.isfile("fighters.json"):
             determine_stats(fighter_temp)
             # Start the moves with the pp from the moves dict.
             # If the move is undefined, give it 10 pp.
-            for pp, mv in zip(["pp_0", "pp_1", "pp_2", "pp_3"], ["move_0", "move_1", "move_2", "move_3"]):
+            for pp, mv in zip(["pp_0", "pp_1", "pp_2", "pp_3"], \
+                              ["move_0", "move_1", "move_2", "move_3"]):
                 try:
                     fighter_temp[pp] = specific_moves.moves_dict[fighter_temp[mv]]["pp"]
                 except KeyError:
                     fighter_temp[pp] = 10
 
-            fighter_temp["moves"] = [fighter_temp["move_0"],fighter_temp["move_1"],fighter_temp["move_2"],fighter_temp["move_3"]]
-            fighter_temp["pps"] = [fighter_temp["pp_0"],fighter_temp["pp_1"],fighter_temp["pp_2"],fighter_temp["pp_3"]]
+            fighter_temp["moves"] = \
+                [fighter_temp["move_0"],fighter_temp["move_1"],\
+                 fighter_temp["move_2"],fighter_temp["move_3"]]
+            fighter_temp["pps"] = \
+                [fighter_temp["pp_0"],fighter_temp["pp_1"],\
+                 fighter_temp["pp_2"],fighter_temp["pp_3"]]
             roster[fighter_temp["id"]] = fighter_temp
         if fighter_data:
             BATTLE_CAN_HAPPEN = True
