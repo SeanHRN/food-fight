@@ -68,18 +68,6 @@ if os.path.isfile("natures.json"):
             natures_dict[nature_temp["name"]] = nature
 
 
-def change_stage_main_stat(target, stat, change):
-    if target[stat] == 6 and change > 0:
-        print(stat + " can't go any higher!")
-    elif target[stat] == -6 and change < 0:
-        print(stat + " can't go any lower!")
-    else:
-        target[stat] = target[stat] + change
-        if target[stat] < 6:
-            target[stat] = 6
-        elif target[stat] < -6:
-            target[stat] = -6
-
 def protect_check(user, move, target):
     '''
     Situations where the move breaks the protect, or if the protect variant has
@@ -96,7 +84,6 @@ def protect_check(user, move, target):
 
 
 def do_status_move(user, move):
-    #print("jojo")
     #print(specific_moves.moves_dict[move]["effect_function"])
     #try:
     move_function = specific_moves.moves_dict[move]["effect_function"]

@@ -365,6 +365,11 @@
         "attr_makes_contact" : true,
         "description" : "After making its attack, the user rushes back to switch places with a party monster in waiting.",
         "attr_bypass_protect" : false
+    },
+    {
+        "name" : "recall",
+        "category" : "alterate",
+        "effect_function" : "move_recall"
     }
 
 ]

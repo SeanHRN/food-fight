@@ -104,12 +104,10 @@ def change_stats(target, stats, levels):
         current_stage = target["curr_stage_" + s]
         proposed_change = current_stage + l
         final_change = proposed_change
-        if proposed_change < -6:
+        if proposed_change <= -6:
             final_change = -6
-        elif proposed_change > 6:
+        elif proposed_change >= 6:
             final_change = 6
-        #print("final_change: " + str(final_change))
-        target["curr_stage_" + s] = final_change
         capped_levels.append(final_change)
     
     print_stat_level_change(target, stats, capped_levels)
@@ -141,7 +139,7 @@ def move_acid_spray(user, target):
         if target["ability"] == "bulletproof":
             print_ability_protect(target)
             return [3,0,0]
-        target["curr_stage_spec_def"] -= 2
+        change_stats(target, ["spec_def"], [-2])
         return [2,0,0]
     return [1,0,0]
 
@@ -316,3 +314,13 @@ def move_protect(user):
         user["state_protect"] = True
     else:
         user["state_protect"] = False
+
+
+# Swapping Out Fighter
+def move_recall(current_fighter):
+    for t in current_fighter["team"]:
+        print(str(t["team_slot"]) + ": " + t["name"])
+    choice = input("Which teammate?\n")
+    #print(current_fighter["team"][int(choice)])# probably won't work
+    #print(current_fighter)
+    return current_fighter["team"][int(choice)] # does not work

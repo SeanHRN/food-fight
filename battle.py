@@ -33,6 +33,10 @@ def do_turn(user, move, target):
         print("\"" + move + "\"" + " was not found!")
         return False
 
+    # EXPERIMENTAL FOR RECALL
+    if move == "recall":
+        return False
+
     if specific_moves.moves_dict[move]["category"] == "status":
         moves.do_status_move(user, move)
 
@@ -88,6 +92,7 @@ def check_round_end(fighter_a, fighter_b):
                 fi["badly_poisoned_level"] += moves.damage_multiplier_badly_poison
             else:
                 fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_poison)
+            fi["curr_hp"] = max(0, fi["curr_hp"])
             print(fi["name"] + " is hurt by poison!")
             print("HP is now: " + str(fi["curr_hp"]))
         elif fi["status"] == "burn":
@@ -115,7 +120,7 @@ def do_battle(fighter_a, fighter_b):
             selected_move = ""
             sufficient_pp = False
             while selected_move not in f["moves"] and sufficient_pp is False:
-                print("\nChoose " + f["name"] + "'s Move: \n", end="")
+                print("\nTurn: " + f["name"] + "\n", end="")
                 longest_name_length = len(max(f["moves"], key=len))
                 longest_type_length = 0
                 for m in f["moves"]:
@@ -130,6 +135,12 @@ def do_battle(fighter_a, fighter_b):
                     print(f_string_moves)
 
                 selected_move = input("\n")
+                # Recall Check
+                if selected_move.lower() == "recall":
+                    f["queued_move"] = "recall" #TODO: Make Pursuit work with this.
+                    #f = specific_moves.move_recall(f)
+                    return "swap", 1# WORK IN PROGRESS
+
                 if selected_move.isdigit() and int(selected_move) in range(4):
                     if f["pps"][int(selected_move)] == 0:
                         print("\nThere's no PP left for this move!\n")
@@ -187,10 +198,8 @@ def do_battle(fighter_a, fighter_b):
         print("- - - - - - - - -")
 
     if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
-        print(fighter_a["name"] + " wins!")
         fighter_b["koed"] = True
     elif fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
-        print(fighter_b["name"] + " wins!")
         fighter_a["koed"] = True
     else: # Tie Breakers
         for index,f in enumerate([fighter_a, fighter_b]):
@@ -198,6 +207,7 @@ def do_battle(fighter_a, fighter_b):
                 #print(f["name"] + " wins!") #JOJO
                 f["defeated_opponent"] = True
                 f[1-index]["koed"] = True
+    return "none", 6
 
 
 def determine_stats(f):
@@ -312,7 +322,16 @@ if os.path.isfile("fighters.json"):
 if BATTLE_CAN_HAPPEN:
 
     team_a = [roster[1].copy(), roster[2].copy()]
+
+    for slot,f in enumerate(team_a):
+        f["team_slot"] = slot
+        f["team"] = team_a
+
     team_b = [roster[3].copy(), roster[4].copy()]
+
+    for slot,f in enumerate(team_b):
+        f["team_slot"] = slot
+        f["team"] = team_b
 
     select_a = 99999
     select_b = 99999
@@ -321,6 +340,8 @@ if BATTLE_CAN_HAPPEN:
     defeated_b = False
 
 
+
+# 1v1
 #    while select_a not in range(0, len(roster)):
 #        print("\n- - -Select Character 1 - - -")
 #        for i,c in enumerate(roster):
@@ -341,7 +362,7 @@ if BATTLE_CAN_HAPPEN:
 
 #    debug_print(char_a, char_b)
 
-    print("\n\n--------------\n")
+#    print("\n\n--------------\n")
 
 #    check_print_hp(char_a, char_b)
 #    do_battle(char_a, char_b)
@@ -356,15 +377,20 @@ if BATTLE_CAN_HAPPEN:
                         break
                     next_fighter["team_b"] = index
                     break
-        
+
         # Make this better later.
         # It's to check the victory condition.
         defeated_a = team_a[0]["koed"] and team_a[1]["koed"]
         defeated_b = team_b[0]["koed"] and team_b[1]["koed"]
-        if defeated_a or defeated_b:
+        if defeated_a:
+            print("Player 2 wins!")
             break
-
-        print("Fight: " + team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"])
+        if defeated_b:
+            print("Player 1 wins!")
+            break
+        print("Fight: <<< " + \
+              team_a[next_fighter["team_a"]]["name"] + " vs " + \
+                team_b[next_fighter["team_b"]]["name"] + " >>>")
         do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]])
 
 
