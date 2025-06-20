@@ -369,7 +369,8 @@
     {
         "name" : "recall",
         "category" : "alterate",
-        "effect_function" : "move_recall"
+        "effect_function" : "move_recall",
+        "priority" : 12
     }
 
 ]

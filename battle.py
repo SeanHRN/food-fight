@@ -33,10 +33,6 @@ def do_turn(user, move, target):
         print("\"" + move + "\"" + " was not found!")
         return False
 
-    # EXPERIMENTAL FOR RECALL
-    if move == "recall":
-        return False
-
     if specific_moves.moves_dict[move]["category"] == "status":
         moves.do_status_move(user, move)
 
@@ -99,7 +95,7 @@ def check_round_end(fighter_a, fighter_b):
             fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_burn)
         fi["curr_hp"] = max(0, fi["curr_hp"])
 
-def do_battle(fighter_a, fighter_b):
+def do_battle(fighter_a, fighter_b, suspend_code):
     #
     # Per round:
     #     1. Check starting conditions.
@@ -110,12 +106,19 @@ def do_battle(fighter_a, fighter_b):
     #     6. Do the second move.
     #     7. Check the result.
     #
+    # Suspend Code: 0: The battle is normal.
+    #               1: Fighter A did a recall.
+    #               2: Fighter B did a recall.
+    #
     # Check the conditions of the completion of the battle to break ties.
     while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
+
+        #if suspend_code != 0:
         print()
         check_round_start(fighter_a, fighter_b)
 
         turn_priority = {"a" : 0, "b" : 0}
+
         for index, f in enumerate([fighter_a, fighter_b]):
             selected_move = ""
             sufficient_pp = False
@@ -136,10 +139,9 @@ def do_battle(fighter_a, fighter_b):
 
                 selected_move = input("\n")
                 # Recall Check
-                if selected_move.lower() == "recall":
-                    f["queued_move"] = "recall" #TODO: Make Pursuit work with this.
-                    #f = specific_moves.move_recall(f)
-                    return "swap", 1# WORK IN PROGRESS
+                ###if selected_move.lower() == "recall":
+                ###    f["queued_move"] = "recall" #TODO: Make Pursuit work with this.
+                ###    return "recall", index, 1# WORK IN PROGRESS
 
                 if selected_move.isdigit() and int(selected_move) in range(4):
                     if f["pps"][int(selected_move)] == 0:
@@ -150,7 +152,7 @@ def do_battle(fighter_a, fighter_b):
 
                 is_info_call = bool(re.search(r'[0-3][i,info,d,desc,description]', selected_move))
                 if is_info_call:
-                    print("\n" + specific_moves.moves_dict[m]["description"] + "\n")
+                    print("\n" + specific_moves.moves_dict[f["moves"][int(selected_move[0])]]["description"] + "\n")
             f["queued_move"] = selected_move
             print("[   " + case_change(selected_move) + "   ]\n")
             if selected_move != "protect": # Refresh Protect Counter
@@ -204,7 +206,6 @@ def do_battle(fighter_a, fighter_b):
     else: # Tie Breakers
         for index,f in enumerate([fighter_a, fighter_b]):
             if "sd_counter_win" in f and f["sd_counter_win"] is True:
-                #print(f["name"] + " wins!") #JOJO
                 f["defeated_opponent"] = True
                 f[1-index]["koed"] = True
     return "none", 6
@@ -391,7 +392,13 @@ if BATTLE_CAN_HAPPEN:
         print("Fight: <<< " + \
               team_a[next_fighter["team_a"]]["name"] + " vs " + \
                 team_b[next_fighter["team_b"]]["name"] + " >>>")
-        do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]])
-
+        battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
+        if battle_output[0] == "recall": # All this is experimental
+            print("Recall requested by team!: " + str(battle_output[1]) + " to use fighter: " + str(battle_output[2]))
+            if battle_output[1] == 0:
+                next_fighter["team_a"] = battle_output[2]
+            else:
+                next_fighter["team_b"] = battle_output[2]
+            battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
 
     print("\n\n--------------\n")
