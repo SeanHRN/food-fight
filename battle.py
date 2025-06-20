@@ -188,13 +188,16 @@ def do_battle(fighter_a, fighter_b):
 
     if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
         print(fighter_a["name"] + " wins!")
+        fighter_b["koed"] = True
     elif fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
         print(fighter_b["name"] + " wins!")
+        fighter_a["koed"] = True
     else: # Tie Breakers
-        for f in [fighter_a, fighter_b]:
+        for index,f in enumerate([fighter_a, fighter_b]):
             if "sd_counter_win" in f and f["sd_counter_win"] is True:
-                print(f["name"] + " wins!")
+                #print(f["name"] + " wins!") #JOJO
                 f["defeated_opponent"] = True
+                f[1-index]["koed"] = True
 
 
 def determine_stats(f):
@@ -284,6 +287,7 @@ if os.path.isfile("fighters.json"):
             fighter_temp["spec_att"] = 0
             fighter_temp["spec_def"] = 0
             fighter_temp["speed"] = 0
+            fighter_temp["koed"] = False
             determine_stats(fighter_temp)
             # Start the moves with the pp from the moves dict.
             # If the move is undefined, give it 10 pp.
@@ -306,34 +310,62 @@ if os.path.isfile("fighters.json"):
 
 
 if BATTLE_CAN_HAPPEN:
+
+    team_a = [roster[1].copy(), roster[2].copy()]
+    team_b = [roster[3].copy(), roster[4].copy()]
+
     select_a = 99999
     select_b = 99999
 
-    # TODO: Add team structure. Currently, it's just 1v1.
-
-    while select_a not in range(0, len(roster)):
-        print("\n- - -Select Character 1 - - -")
-        for i,c in enumerate(roster):
-            print(str(i) + ": " + roster[c]["name"])
-        select_a = int(input())
-
-    while select_b not in range(0, len(roster)):
-        print("\n- - - Select Character 2 - - -")
-        for i,c in enumerate(roster):
-            print(str(i) + ": " + roster[c]["name"])
-        select_b = int(input())
-
-    char_a = roster[select_a].copy()
-    char_b = roster[select_b].copy()
+    defeated_a = False
+    defeated_b = False
 
 
-    print("\n\n--------------\n")
+#    while select_a not in range(0, len(roster)):
+#        print("\n- - -Select Character 1 - - -")
+#        for i,c in enumerate(roster):
+#            print(str(i) + ": " + roster[c]["name"])
+#        select_a = int(input())
+#
+#    while select_b not in range(0, len(roster)):
+#        print("\n- - - Select Character 2 - - -")
+#        for i,c in enumerate(roster):
+#            print(str(i) + ": " + roster[c]["name"])
+#        select_b = int(input())
 
-    debug_print(char_a, char_b)
+#    char_a = roster[select_a].copy()
+#    char_b = roster[select_b].copy()
+
 
     print("\n\n--------------\n")
 
-    check_print_hp(char_a, char_b)
-    do_battle(char_a, char_b)
+#    debug_print(char_a, char_b)
+
+    print("\n\n--------------\n")
+
+#    check_print_hp(char_a, char_b)
+#    do_battle(char_a, char_b)
+
+    next_fighter = {"team_a" : 0, "team_b" : 0}
+    while defeated_a is False and defeated_b is False:
+        for i,t in enumerate([team_a, team_b]):
+            for index, f in enumerate(t):
+                if f["koed"] is False:
+                    if i == 0:
+                        next_fighter["team_a"] = index
+                        break
+                    next_fighter["team_b"] = index
+                    break
+        
+        # Make this better later.
+        # It's to check the victory condition.
+        defeated_a = team_a[0]["koed"] and team_a[1]["koed"]
+        defeated_b = team_b[0]["koed"] and team_b[1]["koed"]
+        if defeated_a or defeated_b:
+            break
+
+        print("Fight: " + team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"])
+        do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]])
+
 
     print("\n\n--------------\n")
