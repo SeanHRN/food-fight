@@ -148,6 +148,9 @@ def move_acid_spray(user, target):
 def move_analyzed_impale(user, target):
     if check_accuracy(moves_dict["analyzed_impale()"]["accuracy"]):
         user["curr_hp"] -= int(user["hp"] / 16)
+        user["curr_hp"] = max(0, user["curr_hp"])
+        if user["curr_hp"] == 0:
+            user["sd_counter_win"] = True
         print(user["name"] + " was damaged throwing its body!")
         if target["status"] == "poisoned":
             print("analyzed_impale() is boosted with poison!")
@@ -286,6 +289,7 @@ def move_belly_drum(user):
     print_stat_level_change(user, ["phy_att"], [6])
     print(user["name"] + "'s HP went down!")
     user["curr_hp"] *= 0.5
+    user["curr_hp"] = int(user["curr_hp"])
     user["curr_stage_phy_att"] = 6
 
 def move_dragon_dance(user):

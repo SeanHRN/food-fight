@@ -244,6 +244,7 @@ def calculate_interaction(move, user, target):
 
 
     target["curr_hp"] -= int(damage)
+    target["curr_hp"] = max(0, target["curr_hp"])
 
     match type_multiplier:
         case 2.0 | 4.0:

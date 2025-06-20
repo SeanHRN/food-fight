@@ -35,6 +35,8 @@ def check_soup_burst(user, target):
             check_print_hp(user, target)
         else:
             print(target["name"] + " avoided the soup!")
+        #if user["curr_hp"] <= 0 and target["curr_hp"] <= 0:
+        user["sd_counter_win"] = True
 
 
 def check_technician(user, target, move, move_power):

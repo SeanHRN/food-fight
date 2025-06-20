@@ -136,13 +136,13 @@
     "base_hp"  : 90,
     "base_phy_att" : 150,
     "base_phy_def" : 100,
-    "base_spec_att" : 90,
-    "base_spec_def" : 90,
+    "base_spec_att" : 70,
+    "base_spec_def" : 80,
     "base_speed" : 150,
     "ability"  : "punk rock",
     "move_0"   : "drum solo",
     "move_1"   : "mach punch",
-    "move_2"   : "u-turn",
+    "move_2"   : "later gator",
     "move_3"   : "belly drum",
     "weight"   : 90.0,
     "level"    : 100,
@@ -190,7 +190,7 @@
     "ev_spec_att" : 4,
     "ev_spec_def" : 0,
     "ev_speed" : 0,
-    "nature" : ""
+    "nature" : "brave"
     }
     ]
 }

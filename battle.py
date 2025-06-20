@@ -6,6 +6,7 @@ import sys
 import csv
 import json
 import moves
+import specific_moves
 import abilities
 sys.path.append(os.getcwd())
 
@@ -27,17 +28,17 @@ def do_turn(user, move, target):
     print("\n--------------")
     print(user["name"] + " used " + case_change(move) + "!\n")
 
-    if not move in moves.specific_moves.moves_dict:
+    if not move in specific_moves.moves_dict:
         print("\"" + move + "\"" + " was not found!")
         return False
 
-    if moves.specific_moves.moves_dict[move]["category"] == "status":
+    if specific_moves.moves_dict[move]["category"] == "status":
         moves.do_status_move(user, move)
 
     # Uses a loop so that multi-hit moves can work.
-    elif moves.specific_moves.moves_dict[move]["category"] != "status":
+    elif specific_moves.moves_dict[move]["category"] != "status":
         if moves.protect_check(user, move, target) is False:
-            for _ in itertools.repeat(None, moves.specific_moves.moves_dict[move]["instances"]):
+            for _ in itertools.repeat(None, specific_moves.moves_dict[move]["instances"]):
                 moves.calculate_interaction(move, user, target)
                 if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
                     return True
@@ -79,19 +80,19 @@ def check_round_middle(fighter_a, fighter_b):
 
 def check_round_end(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
-    for fighter in l:
-        if fighter["status"] == "poison":
-            if fighter["badly_poisoned"]:
-                fighter["curr_hp"] -= int(fighter["hp"] * \
-                    float(fighter["badly_poisoned_level"]) * moves.damage_multiplier_badly_poison)
-                fighter["badly_poisoned_level"] += moves.damage_multiplier_badly_poison
+    for fi in l:
+        if fi["status"] == "poison":
+            if fi["badly_poisoned"]:
+                fi["curr_hp"] -= int(fi["hp"] * \
+                    float(fi["badly_poisoned_level"]) * moves.damage_multiplier_badly_poison)
+                fi["badly_poisoned_level"] += moves.damage_multiplier_badly_poison
             else:
-                fighter["curr_hp"] -= int(fighter["hp"] * moves.damage_multiplier_poison)
-            print(fighter["name"] + " is hurt by poison!")
-            print("HP is now: " + str(fighter["curr_hp"]))
-        elif fighter["status"] == "burn":
-            fighter["curr_hp"] -= int(fighter["hp"] * moves.damage_multiplier_burn)
-
+                fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_poison)
+            print(fi["name"] + " is hurt by poison!")
+            print("HP is now: " + str(fi["curr_hp"]))
+        elif fi["status"] == "burn":
+            fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_burn)
+        fi["curr_hp"] = max(0, fi["curr_hp"])
 
 def do_battle(fighter_a, fighter_b):
     #
@@ -104,6 +105,7 @@ def do_battle(fighter_a, fighter_b):
     #     6. Do the second move.
     #     7. Check the result.
     #
+    # Check the conditions of the completion of the battle to break ties.
     while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
         print()
         check_round_start(fighter_a, fighter_b)
@@ -114,8 +116,19 @@ def do_battle(fighter_a, fighter_b):
             sufficient_pp = False
             while selected_move not in f["moves"] and sufficient_pp is False:
                 print("Choose " + f["name"] + "'s Move: \n", end="")
+                longest_name_length = len(max(f["moves"], key=len))
+                longest_type_length = 0
+                for m in f["moves"]:
+                    new_type_len = len(specific_moves.moves_dict[m]["type"])
+                    longest_type_length = max(longest_type_length, new_type_len)
+
                 for num, m in enumerate(f["moves"]):
-                    print(str(num) + ": [ " + case_change(m) + " ]--[PP: " + str(f["pps"][num]) + "]\n", end="")
+                    pad0 = " " * (longest_name_length - len(m))
+                    pad1 = " " + (" " * (longest_type_length - len(specific_moves.moves_dict[m]["type"])))
+                    tv = (str(num), case_change(m), pad0, specific_moves.moves_dict[m]["type"].title(), pad1, str(f["pps"][num]))
+                    f_string_moves = f"{tv[0]}: {tv[1]} {tv[2]}-- {tv[3]}{tv[4]} -- PP: {tv[5]}"
+                    print(f_string_moves)
+
                 selected_move = input("\n")
                 if selected_move.isdigit() and int(selected_move) in range(4):
                     if f["pps"][int(selected_move)] == 0:
@@ -129,7 +142,7 @@ def do_battle(fighter_a, fighter_b):
             if selected_move != "protect": # Refresh Protect Counter
                 f["count_protect"] = 0
             try:
-                pri = int(moves.specific_moves.moves_dict[f["queued_move"]]["priority"])
+                pri = int(specific_moves.moves_dict[f["queued_move"]]["priority"])
             except KeyError:
                 pri = 0
             if index == 0:
@@ -169,6 +182,16 @@ def do_battle(fighter_a, fighter_b):
         for f in [fighter_a, fighter_b]:
             f["previous_move"] = f["queued_move"]
         print("- - - - - - - - -")
+
+    if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
+        print(fighter_a["name"] + " wins!")
+    elif fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
+        print(fighter_b["name"] + " wins!")
+    else: # Tie Breakers
+        for f in [fighter_a, fighter_b]:
+            if "sd_counter_win" in f and f["sd_counter_win"] is True:
+                print(f["name"] + " wins!")
+                f["defeated_opponent"] = True
 
 
 def determine_stats(f):
@@ -230,6 +253,7 @@ if os.path.isfile("fighters.json"):
     with open("fighters.json", "r", encoding="UTF-8") as fighter_file:
         fighter_data = json.load(fighter_file)
         for fighter in fighter_data["fighters"]:
+
             fighter_temp = {}
             for key, value in fighter.items():
                 fighter_temp[key] = value
@@ -258,12 +282,11 @@ if os.path.isfile("fighters.json"):
             fighter_temp["spec_def"] = 0
             fighter_temp["speed"] = 0
             determine_stats(fighter_temp)
-
             # Start the moves with the pp from the moves dict.
             # If the move is undefined, give it 10 pp.
-            for pp, m in zip(["pp_0", "pp_1", "pp_2", "pp_3"], ["move_0", "move_1", "move_2", "move_3"]):
+            for pp, mv in zip(["pp_0", "pp_1", "pp_2", "pp_3"], ["move_0", "move_1", "move_2", "move_3"]):
                 try:
-                    fighter_temp[pp] = moves.specific_moves.moves_dict[fighter_temp[m]]["pp"]
+                    fighter_temp[pp] = specific_moves.moves_dict[fighter_temp[mv]]["pp"]
                 except KeyError:
                     fighter_temp[pp] = 10
 
@@ -281,13 +304,13 @@ if BATTLE_CAN_HAPPEN:
     # TODO: Add team structure. Currently, it's just 1v1.
 
     while select_a not in range(0, len(roster)):
-        print("Select Character 1")
+        print("\n- - -Select Character 1 - - -")
         for i,c in enumerate(roster):
             print(str(i) + ": " + roster[c]["name"])
         select_a = int(input())
 
     while select_b not in range(0, len(roster)):
-        print("Select Character 2")
+        print("\n- - - Select Character 2 - - -")
         for i,c in enumerate(roster):
             print(str(i) + ": " + roster[c]["name"])
         select_b = int(input())

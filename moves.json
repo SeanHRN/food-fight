@@ -99,6 +99,20 @@
         "attr_bypass_protect" : false
     },
     {
+        "name"     : "later gator",
+        "type"     : "dragon",
+        "category" : "physical",
+        "pp"       : 32,
+        "power"    : 70,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_u_turn",
+        "attr_makes_contact" : true,
+        "description" : "After making its attack, the user rushes back to switch places with a party monster in waiting.",
+        "attr_bypass_protect" : false
+    },
+    {
         "name"     : "lunge",
         "type"     : "bug",
         "category" : "physical",
@@ -195,7 +209,6 @@
         "attr_makes_contact" : true,
         "description" : "The user throws a punch at blinding speed. This move always goes first.",
         "attr_bypass_protect" : false
-
     },
     {
         "name"     : "sucker punch",
