@@ -96,6 +96,7 @@ def check_round_end(fighter_a, fighter_b):
         fi["curr_hp"] = max(0, fi["curr_hp"])
 
 def do_battle(fighter_a, fighter_b, suspend_code):
+    print("suspend code: " + str(suspend_code))
     #
     # Per round:
     #     1. Check starting conditions.
@@ -106,9 +107,13 @@ def do_battle(fighter_a, fighter_b, suspend_code):
     #     6. Do the second move.
     #     7. Check the result.
     #
-    # Suspend Code: 0: The battle is normal.
-    #               1: Fighter A did a recall.
-    #               2: Fighter B did a recall.
+    # Suspend/Battle Code: 0: The battle is normal.
+    #                      1: Fighter A did a recall.
+    #                      2: Fighter B did a recall.
+    #
+    # Return Values: [0: Exit code string
+    #                 1: Team that will swap
+    #                 2: Index of the swap-in fighter ]
     #
     # Check the conditions of the completion of the battle to break ties.
     while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
@@ -119,96 +124,139 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
         turn_priority = {"a" : 0, "b" : 0}
 
-        for index, f in enumerate([fighter_a, fighter_b]):
-            selected_move = ""
-            sufficient_pp = False
-            while selected_move not in f["moves"] and sufficient_pp is False:
-                print("\nTurn: " + f["name"] + "\n", end="")
-                longest_name_length = len(max(f["moves"], key=len))
-                longest_type_length = 0
-                for m in f["moves"]:
-                    new_type_len = len(specific_moves.moves_dict[m]["type"])
-                    longest_type_length = max(longest_type_length, new_type_len)
+        if suspend_code == 0:
+            for index, f in enumerate([fighter_a, fighter_b]):
+                selected_move = ""
+                sufficient_pp = False
+                while (selected_move not in f["moves"] and sufficient_pp is False) and (selected_move != "recall"):
+                    print("\nTurn: " + f["name"] + "\n", end="")
+                    longest_name_length = len(max(f["moves"], key=len))
+                    longest_type_length = 0
+                    for m in f["moves"]:
+                        new_type_len = len(specific_moves.moves_dict[m]["type"])
+                        longest_type_length = max(longest_type_length, new_type_len)
 
-                for num, m in enumerate(f["moves"]):
-                    pad0 = " " * (longest_name_length - len(m))
-                    pad1 = " " + (" " * (longest_type_length - len(specific_moves.moves_dict[m]["type"])))
-                    tv = (str(num), case_change(m), pad0, specific_moves.moves_dict[m]["type"].title(), pad1, str(f["pps"][num]))
-                    f_string_moves = f"{tv[0]}: {tv[1]} {tv[2]}-- {tv[3]}{tv[4]} -- PP: {tv[5]}"
-                    print(f_string_moves)
+                    for num, m in enumerate(f["moves"]):
+                        pad0 = " " * (longest_name_length - len(m))
+                        pad1 = " " + (" " * (longest_type_length - len(specific_moves.moves_dict[m]["type"])))
+                        tv = (str(num), case_change(m), pad0, specific_moves.moves_dict[m]["type"].title(), pad1, str(f["pps"][num]))
+                        f_string_moves = f"{tv[0]}: {tv[1]} {tv[2]}-- {tv[3]}{tv[4]} -- PP: {tv[5]}"
+                        print(f_string_moves)
 
-                selected_move = input("\n")
-                # Recall Check
-                ###if selected_move.lower() == "recall":
-                ###    f["queued_move"] = "recall" #TODO: Make Pursuit work with this.
-                ###    return "recall", index, 1# WORK IN PROGRESS
+                    selected_move = input("\n")
+                    if selected_move.isdigit() and int(selected_move) in range(4):
+                        if f["pps"][int(selected_move)] == 0:
+                            print("\nThere's no PP left for this move!\n")
+                        else:
+                            f["pps"][int(selected_move)] -= 1
+                            selected_move = f["moves"][int(selected_move)]
 
-                if selected_move.isdigit() and int(selected_move) in range(4):
-                    if f["pps"][int(selected_move)] == 0:
-                        print("\nThere's no PP left for this move!\n")
-                    else:
-                        f["pps"][int(selected_move)] -= 1
-                        selected_move = f["moves"][int(selected_move)]
+                    is_info_call = bool(re.search(r'[0-3][i,info,d,desc,description]', selected_move))
+                    if is_info_call:
+                        print("\n" + specific_moves.moves_dict[f["moves"][int(selected_move[0])]]["description"] + "\n")
+                f["queued_move"] = selected_move
+                print("[   " + case_change(selected_move) + "   ]\n")
+                if selected_move != "protect": # Refresh Protect Counter
+                    f["count_protect"] = 0
+                try:
+                    pri = int(specific_moves.moves_dict[f["queued_move"]]["priority"])
+                except KeyError:
+                    pri = 0
+                if index == 0:
+                    turn_priority["a"] = pri
+                else:
+                    turn_priority["b"] = pri
 
-                is_info_call = bool(re.search(r'[0-3][i,info,d,desc,description]', selected_move))
-                if is_info_call:
-                    print("\n" + specific_moves.moves_dict[f["moves"][int(selected_move[0])]]["description"] + "\n")
-            f["queued_move"] = selected_move
-            print("[   " + case_change(selected_move) + "   ]\n")
-            if selected_move != "protect": # Refresh Protect Counter
-                f["count_protect"] = 0
-            try:
-                pri = int(specific_moves.moves_dict[f["queued_move"]]["priority"])
-            except KeyError:
-                pri = 0
-            if index == 0:
-                turn_priority["a"] = pri
-            else:
-                turn_priority["b"] = pri
+            goes_first = 'a'
 
-        goes_first = 'a'
-
-
-        # Priority Check
-        if turn_priority["a"] < turn_priority["b"]:
-            goes_first = 'b'
-        if turn_priority["a"] == turn_priority["b"]:
-            speed_mult_a = moves.stage_multiplier_main_stats_dict[fighter_a["curr_stage_speed"]]
-            speed_mult_b = moves.stage_multiplier_main_stats_dict[fighter_b["curr_stage_speed"]]
-            if fighter_a["speed"] * speed_mult_a < fighter_b["speed"] * speed_mult_b:
+            # Priority Check
+            if turn_priority["a"] < turn_priority["b"]:
                 goes_first = 'b'
-            elif fighter_a["speed"] == fighter_b["speed"]:
-                if random.random() < 0.5:
+            if turn_priority["a"] == turn_priority["b"]:
+                speed_mult_a = moves.stage_multiplier_main_stats_dict[fighter_a["curr_stage_speed"]]
+                speed_mult_b = moves.stage_multiplier_main_stats_dict[fighter_b["curr_stage_speed"]]
+                if fighter_a["speed"] * speed_mult_a < fighter_b["speed"] * speed_mult_b:
                     goes_first = 'b'
+                elif fighter_a["speed"] == fighter_b["speed"]:
+                    if random.random() < 0.5:
+                        goes_first = 'b'
 
-        # Speed Check
-        # 'if not', meaning: If this doesn't end the fight, keep going.
-        print("- - - - - - - - -")
-        if goes_first == 'a':
-            if not do_turn(fighter_a, fighter_a["queued_move"], fighter_b):
+
+            # TODO: Streamline this with an a/b list.
+            # Experimental: Recall / Suspend System
+            if fighter_a["queued_move"] == "recall":
+                print("Recall requested for team A!")
+                usable_range = [0, 1]
+                usable_range.remove(fighter_a["team_slot"])
+                next_f = 999
+                while int(next_f) not in usable_range:
+                    for ic in usable_range:
+                        print(str(ic) + ": " + team_a[ic]["name"])
+                    next_f = input("Which character?\n")
+
+                #print("--=-- recall")
+                return "recall", 1, int(next_f)
+            if fighter_b["queued_move"] == "recall":
+                print("Recall requested for team B!")
+                usable_range = [0, 1]
+                usable_range.remove(fighter_b["team_slot"])
+                next_f = 999
+                while int(next_f) not in usable_range:
+                    for ic in usable_range:
+                        print(str(ic) + ": " + team_b[ic]["name"])
+                    next_f = input("Which character?\n")
+                return "recall", 2, int(next_f)
+
+
+            # Speed Check
+            # 'if not', meaning: If this doesn't end the fight, keep going.
+            print("- - - - - - - - -")
+            if goes_first == 'a':
+                if not do_turn(fighter_a, fighter_a["queued_move"], fighter_b):
+                    do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
+            else:
+                if not do_turn(fighter_b, fighter_b["queued_move"], fighter_a):
+                    do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
+
+            if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
+                check_round_end(fighter_a, fighter_b)
+
+########################
+
+        # Highly Experimental - Suspend System Continuation
+        if suspend_code in [1, 2]:
+            if suspend_code == 1:
                 do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-        else:
-            if not do_turn(fighter_b, fighter_b["queued_move"], fighter_a):
+            elif suspend_code == 2:
                 do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
+            if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
+                check_round_end(fighter_a, fighter_b)
+            #suspend_code = 0
+            return "completion after suspend", 0, 0
+########################
 
-        if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
-            check_round_end(fighter_a, fighter_b)
+        else:
+            for f in [fighter_a, fighter_b]:
+                f["previous_move"] = f["queued_move"]
+            print("- - - - - - - - -")
 
 
-        for f in [fighter_a, fighter_b]:
-            f["previous_move"] = f["queued_move"]
-        print("- - - - - - - - -")
 
     if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
         fighter_b["koed"] = True
+        #print("returning keepa")
+        return "fighter_b_defeated", 0, 0
     elif fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
         fighter_a["koed"] = True
+        #print("returning keepb")
+        return "fighter_a_defeated", 0, 0
     else: # Tie Breakers
         for index,f in enumerate([fighter_a, fighter_b]):
             if "sd_counter_win" in f and f["sd_counter_win"] is True:
                 f["defeated_opponent"] = True
                 f[1-index]["koed"] = True
-    return "none", 6
+        return "fighter_both_defeated", 0, 0
+    return "normal_completion", 0, 0
 
 
 def determine_stats(f):
@@ -368,17 +416,35 @@ if BATTLE_CAN_HAPPEN:
 #    check_print_hp(char_a, char_b)
 #    do_battle(char_a, char_b)
 
+    return_code = "none"
     next_fighter = {"team_a" : 0, "team_b" : 0}
     while defeated_a is False and defeated_b is False:
-        for i,t in enumerate([team_a, team_b]):
-            for index, f in enumerate(t):
-                if f["koed"] is False:
-                    if i == 0:
-                        next_fighter["team_a"] = index
-                        break
-                    next_fighter["team_b"] = index
-                    break
+        #print("Point X: at this point, the next_fighter codes are: " + str(next_fighter))
 
+        if return_code in ["fighter_a_defeated", "both_defeated"]:
+            for i, f in enumerate(team_a):
+                if f["koed"] is False:
+                    print(str(i) + ": " + team_a[i]["name"])
+            input_a = input("Select the next fighter for Team A:\n")
+            next_fighter["team_a"] = int(input_a)
+        if return_code in ["fighter_b_defeated", "both_defeated"]:
+            for i, f in enumerate(team_b):
+                if f["koed"] is False:
+                    print(str(i) + ": " + team_b[i]["name"])
+            input_b = input("Select the next fighter for Team B:\n")
+            next_fighter["team_b"] = int(input_b)
+
+        elif return_code in ["keep_a", "keep_both"]: # This is going to be redundant. Make it compact later.
+            print("keep_a!")
+            for index, f in enumerate(team_b):
+                if f["koed"] is False:
+                    next_fighter["team_b"] = index
+        elif return_code in ["keep_b", "keep_both"]:
+            print("keep_b!")
+            for index, f in enumerate(team_a):
+                if f["koed"] is False:
+                    next_fighter["team_a"] = index
+        ########################################################
         # Make this better later.
         # It's to check the victory condition.
         defeated_a = team_a[0]["koed"] and team_a[1]["koed"]
@@ -389,16 +455,28 @@ if BATTLE_CAN_HAPPEN:
         if defeated_b:
             print("Player 1 wins!")
             break
-        print("Fight: <<< " + \
-              team_a[next_fighter["team_a"]]["name"] + " vs " + \
-                team_b[next_fighter["team_b"]]["name"] + " >>>")
+        #print("Fight: <<< " + \
+        #      team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
+        print("calling do_battle() normally with: " + team_a[next_fighter["team_a"]]["name"] + " and " + team_b[next_fighter["team_b"]]["name"])
         battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
+        print("checking battle_output[0]: " + battle_output[0])
+
         if battle_output[0] == "recall": # All this is experimental
-            print("Recall requested by team!: " + str(battle_output[1]) + " to use fighter: " + str(battle_output[2]))
-            if battle_output[1] == 0:
+            print("Recall requested by team " + str(battle_output[1]) + " to use fighter: " + str(battle_output[2]))
+            if battle_output[1] == 1:
                 next_fighter["team_a"] = battle_output[2]
-            else:
+                #team_a[next_fighter["team_a"]] = next_fighter["team_a"]
+                print("next fighter a: " + team_a[next_fighter["team_a"]]["name"])
+            elif battle_output[1] == 2:
                 next_fighter["team_b"] = battle_output[2]
-            battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+                #team_b[next_fighter["team_b"]] = next_fighter["team_b"]
+                print("next fighter b: " + team_a[next_fighter["team_b"]]["name"])
+            print("calling do_battle() after recall with: " + team_a[next_fighter["team_a"]]["name"] + " and " + team_b[next_fighter["team_b"]]["name"])
+            do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+
+            #print("Point V: at this point, the next_fighter codes are: " + str(next_fighter))
+            #return_code = "none"
+        #if battle_output[0] == "keep_a" or battle_output[1] == "keep_b":
+        return_code = battle_output[0]
 
     print("\n\n--------------\n")

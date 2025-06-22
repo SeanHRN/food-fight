@@ -233,10 +233,12 @@ def move_sludge_bomb(user, target):
 
 def move_sucker_punch(user, target):
     if check_accuracy(moves_dict["sucker punch"]["accuracy"]):
-        if moves_dict[target["queued_move"]]["category"] != "status":
-            return [2,0,0]
-        else:
+        try:
+            if moves_dict[target["queued_move"]]["category"] != "status":
+                return [2,0,0]
             return [0,0,0]
+        except KeyError: # In case the opponent recalls.
+            return [0, 0, 0]
 
 def move_scrape(user, target):
     if check_accuracy(moves_dict["scrape()"]["accuracy"]):
