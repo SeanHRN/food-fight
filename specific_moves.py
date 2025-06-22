@@ -274,8 +274,13 @@ def move_u_turn(user, target):
     Properly fill this in when the team system is working.
     '''
     if check_accuracy(moves_dict["u-turn"]["accuracy"]):
-        return [2,0,0]
+        return [4,0,0]
     return [1,0,0]
+
+
+
+
+
 
 # Status Moves
 
@@ -318,11 +323,32 @@ def move_protect(user):
         user["state_protect"] = False
 
 
+
+
+
 # Swapping Out Fighter
-def move_recall(current_fighter):
-    for t in current_fighter["team"]:
-        print(str(t["team_slot"]) + ": " + t["name"])
-    choice = input("Which teammate?\n")
-    #print(current_fighter["team"][int(choice)])# probably won't work
-    #print(current_fighter)
-    return current_fighter["team"][int(choice)] # does not work
+##def move_recall(current_fighter):
+##    print("hi")
+    #for t in current_fighter["team"]:
+    #    print(str(t["team_slot"]) + ": " + t["name"])
+    #choice = input("Which teammate?\n")
+
+#    print(current_fighter["name"] + " is going back!")
+#    usable_range = list(range(len(current_fighter["team"])))
+#    usable_range.remove(current_fighter["team_slot"])
+#    next_f = 999
+#    while int(next_f) not in usable_range:
+#        for ic in usable_range:
+#            print(str(ic) + ": " + current_fighter["team"][ic]["name"])
+#        next_f = input("Which character?\n")
+
+
+
+                #print("Recall for team A:")
+                #usable_range = [0, 1]
+                #usable_range.remove(fighter_a["team_slot"])
+                #next_f = 999
+                #while int(next_f) not in usable_range:
+                #    for ic in usable_range:
+                #        print(str(ic) + ": " + team_a[ic]["name"])
+                #    next_f = input("Which character?\n")

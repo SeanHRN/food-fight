@@ -25,6 +25,8 @@ major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
 minor_status_set = {"confuse", "infatuate"}
 dinu_moves_set = {"scrape()", "analyzed_impale()"}
 
+u_turn_set = {"u-turn", "later gator", "volt switch", "flip turn"}
+
 damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
 damage_multiplier_burn = 1/16
@@ -67,6 +69,16 @@ if os.path.isfile("natures.json"):
                 nature_temp[nkey] = nvalue
             natures_dict[nature_temp["name"]] = nature
 
+def do_u_turn_effect(user):
+    print(user["name"] + " is going back!")
+    usable_range = list(range(len(user["team"])))
+    usable_range.remove(user["team_slot"])
+    next_f = 999
+    while int(next_f) not in usable_range:
+        for ic in usable_range:
+            print(str(ic) + ": " + user["team"][ic]["name"])
+        next_f = input("Which character?\n")
+    return int(next_f)
 
 def protect_check(user, move, target):
     '''
@@ -155,6 +167,11 @@ def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
         return spec_a, spec_d
 
 def calculate_interaction(move, user, target):
+    '''
+    Return Values:
+        [0-5] : The user U-turned, and the number is the replacement picked.
+        10    : Normal output; no special instruction.
+    '''
     damage = 0
     move_power = specific_moves.moves_dict[move]["power"]
     # Irregular Effect
@@ -166,24 +183,22 @@ def calculate_interaction(move, user, target):
         # Tuple Code System
         # [0]: 0: Failure, 1: Missed, 2: Success (Regular Interaction)
         #      3: Success OR Failed via Ability Resolve (Halt calculate_interaction() Immediately)
+        #      4: U-Turn
         # [1]: Irregular damage to apply
         # [2]: 0: The return value is a damage addition. 1: The return value is a damage multiplier.
         if result[0] == 0:
             print("It failed!")
-            return
-        elif result[0] == 1:
-            return
-        elif result[0] == 2:
+            return 10
+        if result[0] == 1:
+            return 10
+        if result[0] == 2:
             if result[2] == 0:
                 move_power += result[1]
             elif result[2] == 1:
                 move_power *= result[1]
-        else: # result[0] == 3
-            return
-    else: # Basic attack; just do the accuracy check.
-        if specific_moves.check_accuracy(specific_moves.moves_dict[move]["accuracy"]) is False:
-            return
-
+        if result[0] == 3:
+            return 10
+        #else: # result[0] == 4:
 
     # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
     move_power = ability_check_category_1(user, target, move, move_power)
@@ -212,12 +227,12 @@ def calculate_interaction(move, user, target):
 
     # User Burned
     if user["status"] == "burn" and specific_moves.moves_dict[move]["category"] == "physical":
-        damage = damage * 0.5
+        damage *= 0.5
         print("Damage reduced because " + user["name"] + " is burned!")
 
     # STAB
     if specific_moves.moves_dict[move]["type"] in user["types"]:
-        damage = damage * 1.5
+        damage *= 1.5
 
     # Type Effectiveness
     type_multiplier = 1.0
@@ -229,7 +244,7 @@ def calculate_interaction(move, user, target):
     for d in check_ability_based_modifiers(move, user, target):
         damage *= d
 
-
+    # Damage Subtraction
     target["curr_hp"] -= int(damage)
     target["curr_hp"] = max(0, target["curr_hp"])
 
@@ -240,3 +255,7 @@ def calculate_interaction(move, user, target):
             print("It's not very effective...")
         case 0:
             print("It had no effect!")
+
+    if move in u_turn_set:
+        return do_u_turn_effect(user) # U-turn fighter selection as an int
+    return 10
