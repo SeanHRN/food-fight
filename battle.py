@@ -96,7 +96,7 @@ def check_round_end(fighter_a, fighter_b):
         fi["curr_hp"] = max(0, fi["curr_hp"])
 
 def do_battle(fighter_a, fighter_b, suspend_code):
-    print("suspend code: " + str(suspend_code))
+    #print("suspend code: " + str(suspend_code))
     #
     # Per round:
     #     1. Check starting conditions.
@@ -370,6 +370,8 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
+
+
     team_a = [roster[1].copy(), roster[2].copy()]
 
     for slot,f in enumerate(team_a):
@@ -387,52 +389,59 @@ if BATTLE_CAN_HAPPEN:
 
     defeated_a = False
     defeated_b = False
+    valid_pick = False
 
-
-
-# 1v1
-#    while select_a not in range(0, len(roster)):
-#        print("\n- - -Select Character 1 - - -")
-#        for i,c in enumerate(roster):
-#            print(str(i) + ": " + roster[c]["name"])
-#        select_a = int(input())
-#
-#    while select_b not in range(0, len(roster)):
-#        print("\n- - - Select Character 2 - - -")
-#        for i,c in enumerate(roster):
-#            print(str(i) + ": " + roster[c]["name"])
-#        select_b = int(input())
-
-#    char_a = roster[select_a].copy()
-#    char_b = roster[select_b].copy()
-
-
-    print("\n\n--------------\n")
-
-#    debug_print(char_a, char_b)
-
-#    print("\n\n--------------\n")
-
-#    check_print_hp(char_a, char_b)
-#    do_battle(char_a, char_b)
+    longest_name_length_a = 0
+    longest_name_length_b = 0
+    for f in team_a:
+        if len(f["name"]) > longest_name_length_a:
+            longest_name_a = f["name"]
+    for f in team_b:
+        if len(f["name"]) > longest_name_length_b:
+            longest_name_b = f["name"]
 
     return_code = "none"
     next_fighter = {"team_a" : 0, "team_b" : 0}
+
+
     while defeated_a is False and defeated_b is False:
         #print("Point X: at this point, the next_fighter codes are: " + str(next_fighter))
 
         if return_code in ["fighter_a_defeated", "both_defeated"]:
-            for i, f in enumerate(team_a):
-                if f["koed"] is False:
-                    print(str(i) + ": " + team_a[i]["name"])
-            input_a = input("Select the next fighter for Team A:\n")
-            next_fighter["team_a"] = int(input_a)
+            while valid_pick is False:
+                for i, f in enumerate(team_a):
+                    p_name = team_a[i]["name"]
+                    if f["koed"] is False:
+                        string_end = ""
+                    else:
+                        string_end =  ("   " + " " * (longest_name_length_a - len(p_name))) + " [fainted] "
+                    print(str(i) + ": " + p_name + string_end)
+                input_a = input("Select the next fighter for Team A:\n")
+                try:
+                    if team_a[int(input_a)]["koed"] is False:
+                        next_fighter["team_a"] = int(input_a)
+                        break
+                    print("Fighter " + str(input_a) + ": " + team_a[int(input_a)]["name"] + " has fainted!")
+                except IndexError:
+                    print("Selection not valid.")
+
         if return_code in ["fighter_b_defeated", "both_defeated"]:
-            for i, f in enumerate(team_b):
-                if f["koed"] is False:
-                    print(str(i) + ": " + team_b[i]["name"])
-            input_b = input("Select the next fighter for Team B:\n")
-            next_fighter["team_b"] = int(input_b)
+            while valid_pick is False:
+                for i, f in enumerate(team_b):
+                    p_name = team_b[i]["name"]
+                    if f["koed"] is False:
+                        string_end = ""
+                    else:
+                        string_end =  ("   " + " " * (longest_name_length_b - len(p_name))) + " [fainted] "
+                    print(str(i) + ": " + p_name + string_end)
+                input_b = input("Select the next fighter for Team B:\n")
+                try:
+                    if team_b[int(input_b)]["koed"] is False:
+                        next_fighter["team_b"] = int(input_b)
+                        break
+                    print("Fighter " + str(input_b) + ": " + team_b[int(input_b)]["name"] + " has fainted!")
+                except IndexError:
+                    print("Selection not valid.")
 
         elif return_code in ["keep_a", "keep_both"]: # This is going to be redundant. Make it compact later.
             print("keep_a!")
@@ -447,6 +456,21 @@ if BATTLE_CAN_HAPPEN:
         ########################################################
         # Make this better later.
         # It's to check the victory condition.
+
+        print("Fight: <<< " + \
+              team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
+        battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
+        #print("checking battle_output[0]: " + battle_output[0])
+
+        if battle_output[0] == "recall":
+            print("Recall requested by team " + str(battle_output[1]) + " to use fighter: " + str(battle_output[2]))
+            if battle_output[1] == 1:
+                next_fighter["team_a"] = battle_output[2]
+            elif battle_output[1] == 2:
+                next_fighter["team_b"] = battle_output[2]
+            print("Now: " + team_a[next_fighter["team_a"]]["name"] + " and " + team_b[next_fighter["team_b"]]["name"])
+            do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+
         defeated_a = team_a[0]["koed"] and team_a[1]["koed"]
         defeated_b = team_b[0]["koed"] and team_b[1]["koed"]
         if defeated_a:
@@ -455,28 +479,7 @@ if BATTLE_CAN_HAPPEN:
         if defeated_b:
             print("Player 1 wins!")
             break
-        #print("Fight: <<< " + \
-        #      team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
-        print("calling do_battle() normally with: " + team_a[next_fighter["team_a"]]["name"] + " and " + team_b[next_fighter["team_b"]]["name"])
-        battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
-        print("checking battle_output[0]: " + battle_output[0])
 
-        if battle_output[0] == "recall": # All this is experimental
-            print("Recall requested by team " + str(battle_output[1]) + " to use fighter: " + str(battle_output[2]))
-            if battle_output[1] == 1:
-                next_fighter["team_a"] = battle_output[2]
-                #team_a[next_fighter["team_a"]] = next_fighter["team_a"]
-                print("next fighter a: " + team_a[next_fighter["team_a"]]["name"])
-            elif battle_output[1] == 2:
-                next_fighter["team_b"] = battle_output[2]
-                #team_b[next_fighter["team_b"]] = next_fighter["team_b"]
-                print("next fighter b: " + team_a[next_fighter["team_b"]]["name"])
-            print("calling do_battle() after recall with: " + team_a[next_fighter["team_a"]]["name"] + " and " + team_b[next_fighter["team_b"]]["name"])
-            do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
-
-            #print("Point V: at this point, the next_fighter codes are: " + str(next_fighter))
-            #return_code = "none"
-        #if battle_output[0] == "keep_a" or battle_output[1] == "keep_b":
         return_code = battle_output[0]
 
     print("\n\n--------------\n")
