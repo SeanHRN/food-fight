@@ -45,9 +45,11 @@ def do_turn(user, move, target):
         if moves.protect_check(user, move, target) is False:
             for _ in itertools.repeat(None, specific_moves.moves_dict[move]["instances"]):
                 move_output = moves.calculate_interaction(move, user, target)
-
+                print("move output: " + str(move_output))
+                print("team len: " + str(len(user["team"])))
                 # WORK IN PROGRESS: U-TURN SYSTEM
-                if move in moves.u_turn_set and move_output in range(0,5):
+                if move in moves.u_turn_set and move_output in range(len(user["team"])):
+                    print("Return from point FFF")
                     return False, move_output
                 if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
                     return True, move_output
@@ -223,28 +225,31 @@ def do_battle(fighter_a, fighter_b, suspend_code):
             if goes_first == 'a':
                 print("a first")
                 battle_over, special_code = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
-                #print("YYY special code: " + str(special_code))
-                if special_code in range(0, len(fighter_a["team"])-1):
+                print("YYY special code: " + str(special_code))
+                #if special_code in range(0, 5):
+                if special_code in range(len(fighter_a["team"])):
                     print("U-Turning from Team A")
                     return "u-turn", 1, [special_code], False
                 if not battle_over:             # 'if not', meaning: If this doesn't end the fight, keep going.
                     battle_over, special_code = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-                    #print("WWW special code: " + str(special_code))
-                    if special_code in range(0, 5):
+                    print("WWW special code: " + str(special_code))
+                    if special_code in range(len(fighter_b["team"])):
+                    #if special_code in range(0, len(fighter_b["team"]-1)):
                         print("U-Turning from Team B")
                         return "u-turn", 2, [special_code], True
 
             else:
                 print("b first")
                 battle_over, special_code = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-                #print("XXX special code: " + str(special_code))
-                if special_code in range(0, len(fighter_b["team"])-1):
+                print("XXX special code: " + str(special_code))
+                if special_code in range(len(fighter_b["team"])):
                     print("U-Turning from Team B")
                     return "u-turn", 2, [special_code], False
                 if not battle_over:
                     battle_over, special_code = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
-                    #print("ZZZ special code: " + str(special_code))
-                    if special_code in range(0, 5):
+                    print("ZZZ special code: " + str(special_code))
+                    #if special_code in range(0, 5):
+                    if special_code in range(len(fighter_a["team"])):
                         print("U-Turning from Team A")
                         return "u-turn", 1, [special_code], True
 
@@ -475,7 +480,7 @@ if BATTLE_CAN_HAPPEN:
         print("Fight: <<< " + \
               team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
         battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
-        #print("checking battle_output[0]: " + battle_output[0])
+        print("checking battle_output[0]: " + battle_output[0])
         print("battle output: ")
         for p in battle_output:
             print(p)
