@@ -69,16 +69,33 @@ if os.path.isfile("natures.json"):
                 nature_temp[nkey] = nvalue
             natures_dict[nature_temp["name"]] = nature
 
-def do_u_turn_effect(user):
-    print(user["name"] + " is going back!")
-    usable_range = list(range(len(user["team"])))
-    usable_range.remove(user["team_slot"])
-    next_f = 999
-    while int(next_f) not in usable_range:
+def recall(ft, cancel_allowed):
+    '''
+    ft: Fighter
+    cancel_allowed: Whether the user can cancel out of the recall.
+    For regular swap: Yes.
+    For U-turn and its variants: No.
+    This only validates the teammate selection. It does not make the actual change.
+    '''
+    selected_teammate = -1
+    print("Recalling " + ft["name"])
+    usable_range = list(range(len(ft["team"])))
+    if not cancel_allowed:
+        usable_range.remove(ft["team_slot"])
+    for teammate in ft["team"]:
+        if teammate["koed"]:
+            usable_range.remove(teammate["team_slot"])
+    if not usable_range:
+        print("No swappable teammates!")
+        return -1
+    while selected_teammate not in usable_range:
         for ic in usable_range:
-            print(str(ic) + ": " + user["team"][ic]["name"])
-        next_f = input("Which character?\n")
-    return int(next_f)
+            print(str(ic) + ": " + ft["team"][ic]["name"])
+        selected_teammate = int(input("Which character?\n"))
+    return selected_teammate
+
+def do_u_turn_effect(user):
+    return recall(user, False)
 
 def protect_check(user, move, target):
     '''

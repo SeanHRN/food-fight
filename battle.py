@@ -102,29 +102,7 @@ def check_round_end(fighter_a, fighter_b):
             fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_burn)
         fi["curr_hp"] = max(0, fi["curr_hp"])
 
-def recall(ft, cancel_allowed):
-    '''
-    ft: Fighter
-    cancel_allowed: Whether the user can cancel out of the recall.
-    For regular swap: Yes.
-    For U-turn and its variants: No.
-    '''
-    selected_teammate = -1
-    print("Recalling " + ft["name"])
-    usable_range = list(range(len(ft["team"])))
-    if not cancel_allowed:
-        usable_range.remove(ft["team_slot"])
-    for teammate in ft["team"]:
-        if teammate["koed"]:
-            usable_range.remove(teammate["team_slot"])
-    if not usable_range:
-        print("No swappable teammates!")
-        return -1
-    while selected_teammate not in usable_range:
-        for ic in usable_range:
-            print(str(ic) + ": " + ft["team"][ic]["name"])
-        selected_teammate = int(input("Which character?\n"))
-    return selected_teammate
+
 
 def do_battle(fighter_a, fighter_b, suspend_code):
     #print("suspend code: " + str(suspend_code))
@@ -175,17 +153,16 @@ def do_battle(fighter_a, fighter_b, suspend_code):
                         print(f_string_moves)
 
                     selected_move = input("\n")
-                    ### Test Zone
 
+                    # Recall
                     if selected_move == "recall":
-                        recall_return = recall(fi, True)
+                        recall_return = moves.recall(fi, True)
                         if recall_return == fi["team_slot"]:
                             continue
                         if recall_return not in [-1, fi["team_slot"]]:
                             recall_next_f[index] = recall_return
                             break
 
-#                            valid_switch = True
                     # TODO: Make sure PP check is correct.
                     elif selected_move.isdigit() and int(selected_move) in range(0, 4):
                         #valid_switch = True
@@ -212,7 +189,7 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
             goes_first = 'a'
 
-            # Priority Check
+            # Priority Check and Speed Check
             if turn_priority["a"] < turn_priority["b"]:
                 goes_first = 'b'
             if turn_priority["a"] == turn_priority["b"]:
@@ -235,33 +212,36 @@ def do_battle(fighter_a, fighter_b, suspend_code):
             if fighter_a["queued_move"] == "recall" and fighter_b["queued_move"] == "recall":
                 print("Both recalled!")
                 return "recall", 3, [int(recall_next_f[0]), int(recall_next_f[1])]
-
-            # Speed Check
             # 'if not', meaning: If this doesn't end the fight, keep going.
             print("- - - - - - - - -")
 
 
             # Experimental: U-Turn Compatible System
             print("made it down here")
+            u_turn_a = u_turn_b = False
             if goes_first == 'a':
-                print("goes first A")
                 battle_over, special_code = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
                 print("zzz special code: " + str(special_code))
                 if special_code in range(0, 5):
-                    print("U-Turning from Team A")
-                    return "recall", 1, special_code
+                    u_turn_a = True
+                    #print("U-Turning from Team A")
+                    #return "recall", 1, [special_code]
                 if not battle_over:
                     do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-
             else:
-                print("goes first b")
                 battle_over, special_code = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
                 print("xxx special code: " + str(special_code))
                 if special_code in range(0, 5):
-                    print("U-Turning from Team B")
-                    return "recall", 2, special_code
+                    u_turn_b = True
+                    #print("U-Turning from Team B")
+                    #return "recall", 2, [special_code]
                 if not battle_over:
                     do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
+
+
+
+
+            # TODO: Put the U-turn effect at the end so that rough skin/soup burst hits the u-turning opponent.
 
 #            if goes_first == 'a':
 #                if not do_turn(fighter_a, fighter_a["queued_move"], fighter_b)[0]:
@@ -283,7 +263,7 @@ def do_battle(fighter_a, fighter_b, suspend_code):
             if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
                 check_round_end(fighter_a, fighter_b)
             #suspend_code = 0
-            return "completion after suspend", 0, 0
+            return "completion after suspend", 0, [0]
 
 
         else:
@@ -294,17 +274,17 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
     if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
         fighter_b["koed"] = True
-        return "fighter_b_defeated", 0, 0
+        return "fighter_b_defeated", 0, [0]
     elif fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
         fighter_a["koed"] = True
-        return "fighter_a_defeated", 0, 0
+        return "fighter_a_defeated", 0, [0]
     else: # Tie Breakers
         for index,f in enumerate([fighter_a, fighter_b]):
             if "sd_counter_win" in f and f["sd_counter_win"] is True:
                 f["defeated_opponent"] = True
                 f[1-index]["koed"] = True
-        return "fighter_both_defeated", 0, 0
-    return "normal_completion", 0, 0
+        return "fighter_both_defeated", 0, [0]
+    return "normal_completion", 0, [0]
 
 
 def determine_stats(f):
