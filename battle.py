@@ -26,8 +26,9 @@ def do_turn(user, move, target):
     # By using check_round_middle,
     # returns False: Target is not out of HP
     # returns True:  Target is out of HP. The fight is over.
-    # Second return value: 10: Nothing
-    #                      0-5 User used U-turn, and this is the move selection.
+    # Second return value:  10: Nothing
+    #                      0-5: User used U-turn, and this is the move selection.
+    # Third return value: 
     # TODO: Check when U-Turn defeats an opponent.
     print("\n--------------")
     print(user["name"] + " used " + case_change(move) + "!\n")
@@ -122,7 +123,9 @@ def do_battle(fighter_a, fighter_b, suspend_code):
     #
     # Return Values: [0: Exit code string
     #                 1: Team that will swap
-    #                 2: Index of the swap-in fighter ]
+    #                 2: Index of the swap-in fighter
+    #                 3: If the user does a U-Turn: True   - End of the round.
+    #                                               False: - Suspend, so keep the round going.]
     #
     # Check the conditions of the completion of the battle to break ties.
     while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
@@ -212,47 +215,40 @@ def do_battle(fighter_a, fighter_b, suspend_code):
             if fighter_a["queued_move"] == "recall" and fighter_b["queued_move"] == "recall":
                 print("Both recalled!")
                 return "recall", 3, [int(recall_next_f[0]), int(recall_next_f[1])]
-            # 'if not', meaning: If this doesn't end the fight, keep going.
+
             print("- - - - - - - - -")
 
 
             # Experimental: U-Turn Compatible System
-            print("made it down here")
-            u_turn_a = u_turn_b = False
             if goes_first == 'a':
+                print("a first")
                 battle_over, special_code = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
-                print("zzz special code: " + str(special_code))
-                if special_code in range(0, 5):
-                    u_turn_a = True
-                    #print("U-Turning from Team A")
-                    #return "recall", 1, [special_code]
-                if not battle_over:
-                    do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
+                #print("YYY special code: " + str(special_code))
+                if special_code in range(0, len(fighter_a["team"])-1):
+                    print("U-Turning from Team A")
+                    return "u-turn", 1, [special_code], False
+                if not battle_over:             # 'if not', meaning: If this doesn't end the fight, keep going.
+                    battle_over, special_code = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
+                    #print("WWW special code: " + str(special_code))
+                    if special_code in range(0, 5):
+                        print("U-Turning from Team B")
+                        return "u-turn", 2, [special_code], True
+
             else:
+                print("b first")
                 battle_over, special_code = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-                print("xxx special code: " + str(special_code))
-                if special_code in range(0, 5):
-                    u_turn_b = True
-                    #print("U-Turning from Team B")
-                    #return "recall", 2, [special_code]
+                #print("XXX special code: " + str(special_code))
+                if special_code in range(0, len(fighter_b["team"])-1):
+                    print("U-Turning from Team B")
+                    return "u-turn", 2, [special_code], False
                 if not battle_over:
-                    do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
+                    battle_over, special_code = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
+                    #print("ZZZ special code: " + str(special_code))
+                    if special_code in range(0, 5):
+                        print("U-Turning from Team A")
+                        return "u-turn", 1, [special_code], True
 
-
-
-
-            # TODO: Put the U-turn effect at the end so that rough skin/soup burst hits the u-turning opponent.
-
-#            if goes_first == 'a':
-#                if not do_turn(fighter_a, fighter_a["queued_move"], fighter_b)[0]:
-#                    do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-#            else:
-#                if not do_turn(fighter_b, fighter_b["queued_move"], fighter_a)[0]:
-#                    do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
-#
-#            if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
-#                check_round_end(fighter_a, fighter_b)
-
+            # TODO: Make sure that rough skin/soup burst hits the u-turning opponent. Currently, soup burst does not.
 
         # Recall/Suspend System Continuation
         if suspend_code in [1, 2]:
@@ -278,7 +274,7 @@ def do_battle(fighter_a, fighter_b, suspend_code):
     elif fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
         fighter_a["koed"] = True
         return "fighter_a_defeated", 0, [0]
-    else: # Tie Breakers
+    elif fighter_a["curr_hp"] == fighter_b["curr_hp"] == 0: # Tie Breakers
         for index,f in enumerate([fighter_a, fighter_b]):
             if "sd_counter_win" in f and f["sd_counter_win"] is True:
                 f["defeated_opponent"] = True
@@ -480,18 +476,24 @@ if BATTLE_CAN_HAPPEN:
               team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
         battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
         #print("checking battle_output[0]: " + battle_output[0])
+        print("battle output: ")
+        for p in battle_output:
+            print(p)
 
-        if battle_output[0] == "recall":
+
+        if battle_output[0] == "recall" or battle_output[0] == "u-turn":
             if battle_output[1] == 1:
                 reset_stat_changes(team_a[next_fighter["team_a"]])
                 next_fighter["team_a"] = battle_output[2][0]
                 print("Team A sent out " + team_a[int(battle_output[2][0])]["name"] + "!")
-                do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+                if battle_output[0] == "u-turn" and battle_output[3] is False:
+                    do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
             elif battle_output[1] == 2:
                 reset_stat_changes(team_b[next_fighter["team_b"]])
                 next_fighter["team_b"] = battle_output[2][0]
                 print("Team B sent out " + team_b[int(battle_output[2][0])]["name"] + "!")
-                do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+                if battle_output[0] == "u-turn" and battle_output[3] is False:
+                    do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
             elif battle_output[1] == 3:
                 reset_stat_changes(team_a[next_fighter["team_a"]])
                 reset_stat_changes(team_a[next_fighter["team_b"]])
