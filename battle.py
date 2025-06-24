@@ -45,8 +45,6 @@ def do_turn(user, move, target):
         if moves.protect_check(user, move, target) is False:
             for _ in itertools.repeat(None, specific_moves.moves_dict[move]["instances"]):
                 move_output = moves.calculate_interaction(move, user, target)
-                #print("move output: " + str(move_output))
-                # WORK IN PROGRESS: U-TURN SYSTEM
                 if move in moves.u_turn_set and move_output in range(len(user["team"])):
                     return False, move_output
                 if check_round_middle(user, target):    # If someone is out of HP, return true. If not, keep going.
@@ -223,7 +221,7 @@ def do_battle(fighter_a, fighter_b, suspend_code):
             # U-turn Compatible System v2
             u_turn_a = False
             u_turn_b = False
-            special_code = [10, 10]
+            special_code = [10, 10] # 10 is 'blank', since 0 is used for team index.
             if goes_first == 'a':
                 #print("A first")
                 battle_over, special_code[0] = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
@@ -471,12 +469,10 @@ if BATTLE_CAN_HAPPEN:
             select_next_fighter(team_b, "team_b", longest_name_length_b)
 
         if return_code in ["keep_a", "keep_both"]: # This is going to be redundant. Make it compact later.
-            #print("keep_a!")
             for index, f in enumerate(team_b):
                 if f["koed"] is False:
                     next_fighter["team_b"] = index
         if return_code in ["keep_b", "keep_both"]:
-            #print("keep_b!")
             for index, f in enumerate(team_a):
                 if f["koed"] is False:
                     next_fighter["team_a"] = index
@@ -487,7 +483,7 @@ if BATTLE_CAN_HAPPEN:
         #print("checking battle_output[0]: " + battle_output[0])
         #print("battle output: ")
         #for p in battle_output:
-        #    print(p)
+        #    print(p, end= "   ")
 
 
         if battle_output[0] == "recall" or battle_output[0] == "u-turn":
