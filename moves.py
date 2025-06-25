@@ -152,20 +152,6 @@ def ability_check_category_3(target, move):
         return 1
     return 1
 
-
-def check_ability_based_modifiers(move, user, target):
-    '''
-    Also experimental / work in progress
-    Not general enough.
-    Currently works just for Punk Rock.
-    '''
-    mod_user = 1
-    mod_target = 1
-    if user["ability"] == "punk rock" or target["ability"] == "punk rock":
-        mod_user, mod_target = abilities.check_punk_rock(user, target, move)
-    return mod_user, mod_target
-
-
 def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
     '''
     For unusual moves that break the usual physical/special stat interations.
@@ -250,13 +236,11 @@ def calculate_interaction(move, user, target):
 
     damage = (((user["level"] * 2) / 5) + 2) * move_power
 
-
     # Ability Check Category 3: Defense abilities
     damage *= ability_check_category_3(target, move)
 
     damage *= (attack_stat_to_use/def_stat_to_use)
     damage /= 50
-
 
     # User Burned
     if user["status"] == "burn" and specific_moves.moves_dict[move]["category"] == "physical":
@@ -272,10 +256,6 @@ def calculate_interaction(move, user, target):
     for t in target["types"]:
         type_multiplier *= float(types_dict[specific_moves.moves_dict[move]["type"]][t])
     damage *= type_multiplier
-
-    # Ability-Based Modifiers
-    #for d in check_ability_based_modifiers(move, user, target):
-    #    damage *= d
 
     # Damage Subtraction
     target["curr_hp"] -= int(damage)

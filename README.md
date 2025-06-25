@@ -30,7 +30,6 @@ Play it in the terminal!
 
 ## To Do ##
 - Add more status effects
-- Improve modularization of abilities
 - Add held items
 - Make accuracy check do things other than return True
 - Add weather to calculations
