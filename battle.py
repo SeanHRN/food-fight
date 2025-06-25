@@ -430,13 +430,13 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[3].copy()]
+    team_a = [roster[4].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
         f["team"] = team_a
 
-    team_b = [roster[1].copy(), roster[2].copy(), roster[4].copy()]
+    team_b = [roster[1].copy(), roster[2].copy(), roster[3].copy()]
 
     for slot,f in enumerate(team_b):
         f["team_slot"] = slot

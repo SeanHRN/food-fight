@@ -25,6 +25,16 @@ major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
 minor_status_set = {"confuse", "infatuate"}
 dinu_moves_set = {"scrape()", "analyzed_impale()"}
 
+
+# Abilities that boost the move's power, such as Technician and Punk Rock
+ability_category_1_set = {"technician", "punk rock", "tough claws"}
+
+# Abilities that boost the STAB
+ability_category_2_set = {"dragon's maw", "adaptability"}
+
+# Abilities that reduce damage taken
+ability_category_3_set = {"thick fat", "punk rock"}
+
 u_turn_set = {"u-turn", "later gator", "volt switch", "flip turn"}
 
 damage_multiplier_poison = 1/8
@@ -124,22 +134,33 @@ def do_status_move(user, move):
     #    print("Move Function for " + move + " not found!")
     return
 
-def ability_check_category_1(user, target, move, move_power):
+def ability_check_category_1(user, move):
     '''
-    Experimental / Work In Progress
-    Not general enough.
-    Currently works just for Technician.
+    For abilities that boost the move's power based on the move itself.
     '''
-
     try:
         ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
-        if ability_function == "check_technician":
+        if user["ability"] in ability_category_1_set:
             curr_ability_function = getattr(abilities, ability_function)
-            return curr_ability_function(user, target, move, move_power)
+            return curr_ability_function(user, move)
     except KeyError:
-        return move_power
+        return 1
 
-    return move_power
+def ability_check_category_3(target, move):
+    '''
+    For abilities that reduce the power of the move the target receives.
+    '''
+    try:
+        if abilities.abilities_dict[target["ability"]]["alt_effect_function"] != "none":
+            ability_function = abilities.abilities_dict[target["ability"]]["alt_effect_function"]
+        else:
+            ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
+        if target["ability"] in ability_category_3_set:
+            curr_ability_function = getattr(abilities, ability_function)
+            return curr_ability_function(target, move)
+    except KeyError:
+        return 1
+
 
 def check_ability_based_modifiers(move, user, target):
     '''
@@ -217,8 +238,8 @@ def calculate_interaction(move, user, target):
             return 10
         #else: # result[0] == 4:
 
-    # Ability Check: Offense abilities that start with the calculated move_power, such as Technician
-    move_power = ability_check_category_1(user, target, move, move_power)
+    # Ability Check Category 1: Offense abilities that start with the calculated move_power, such as Technician
+    move_power *= ability_check_category_1(user, move)
 
     # Offense and Defense Stats
     phy_attack_stat = user["phy_att"] * stage_multiplier_main_stats_dict[float(user["curr_stage_phy_att"])]
@@ -237,7 +258,11 @@ def calculate_interaction(move, user, target):
         unusual_damage_stat_to_use_check(user, move, phy_attack_stat, spec_attack_stat, phy_def_stat, spec_def_stat)
 
     damage = (((user["level"] * 2) / 5) + 2) * move_power
-    
+
+
+    # Ability Check Category 3: Defense abilities
+    damage *= ability_check_category_3(target, move)
+
     damage *= (attack_stat_to_use/def_stat_to_use)
     damage /= 50
 
@@ -258,8 +283,8 @@ def calculate_interaction(move, user, target):
     damage *= type_multiplier
 
     # Ability-Based Modifiers
-    for d in check_ability_based_modifiers(move, user, target):
-        damage *= d
+    #for d in check_ability_based_modifiers(move, user, target):
+    #    damage *= d
 
     # Damage Subtraction
     target["curr_hp"] -= int(damage)
