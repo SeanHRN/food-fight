@@ -25,16 +25,6 @@ major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
 minor_status_set = {"confuse", "infatuate"}
 dinu_moves_set = {"scrape()", "analyzed_impale()"}
 
-
-# Abilities that boost the move's power, such as Technician and Punk Rock
-ability_category_1_set = {"technician", "punk rock", "tough claws"}
-
-# Abilities that boost the STAB
-ability_category_2_set = {"dragon's maw", "adaptability"}
-
-# Abilities that reduce damage taken
-ability_category_3_set = {"thick fat", "punk rock"}
-
 u_turn_set = {"u-turn", "later gator", "volt switch", "flip turn"}
 
 damage_multiplier_poison = 1/8
@@ -140,7 +130,7 @@ def ability_check_category_1(user, move):
     '''
     try:
         ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
-        if user["ability"] in ability_category_1_set:
+        if user["ability"] in abilities.ability_category_set[1]:
             curr_ability_function = getattr(abilities, ability_function)
             return curr_ability_function(user, move)
     except KeyError:
@@ -155,11 +145,12 @@ def ability_check_category_3(target, move):
             ability_function = abilities.abilities_dict[target["ability"]]["alt_effect_function"]
         else:
             ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
-        if target["ability"] in ability_category_3_set:
+        if target["ability"] in abilities.ability_category_set[3]:
             curr_ability_function = getattr(abilities, ability_function)
             return curr_ability_function(target, move)
     except KeyError:
         return 1
+    return 1
 
 
 def check_ability_based_modifiers(move, user, target):

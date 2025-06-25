@@ -12,11 +12,19 @@ if os.path.isfile("fighters.json"):
     with open("fighters.json", "r", encoding="UTF-8") as fighter_file:
         fighter_data = json.load(fighter_file)
         for fighter in fighter_data["fighters"]:
-
             fighter_temp = {}
             for key, value in fighter.items():
                 fighter_temp[key] = value
 
+
+ # ability_category_set: List of Sets
+ # 0: Unused
+ # 1: Multiplier for move power
+ # 2: Multiplier for STAB
+ # 3: Multiplier for damage reduction
+ # 4: Counter damage
+ # 5: Other (To Be Determined)
+ability_category_set = [set() for _ in range(5)]
 abilities_dict = {}
 if os.path.isfile("abilities.json"):
     with open("abilities.json", "r", encoding="UTF-8") as ability_file:
@@ -25,6 +33,11 @@ if os.path.isfile("abilities.json"):
             ability_temp = {}
             for key, value in ability.items():
                 ability_temp[key] = value
+                if key == "category":
+                    try:
+                        ability_category_set[value].add(ability_temp["name"])
+                    except KeyError:
+                        ability_category_set[value].add(ability_temp["unnamed ability"])
             abilities_dict[ability_temp["name"]] = ability_temp
 
 
@@ -71,16 +84,3 @@ def alt_check_punk_rock(target, move):
         print("Damage lowered by " + target["name"] + "'s Punk Rock!")
         return 0.5
     return 1
-
-
-#def check_punk_rock(user, target, move):
-#    val_user = 1
-#    val_target = 1
-#    if "attr_sound" in specific_moves.moves_dict[move] and specific_moves.moves_dict[move]["attr_sound"]:
-#        if user["ability"].lower() == "punk rock":
-#            val_user = 1.30
-#            print("Damage boosted by Punk Rock!")
-#        if target["ability"].lower() == "punk rock":
-#            val_target = 0.5
-#            print("Damage lowered by Punk Rock!")
-#    return val_user, val_target
