@@ -85,11 +85,9 @@ def check_round_middle(fighter_a, fighter_b):
     return fighter_a["curr_hp"] <= 0 or fighter_b["curr_hp"] <= 0
 
 def check_round_end(fighter_a, fighter_b):
-    #print("check_round_end() called")
     l = [fighter_a, fighter_b]
     for fi in l:
         if fi["status"] == "poison":
-            #print("poison detected")
             if fi["badly_poisoned"]:
                 fi["curr_hp"] -= int(fi["hp"] * \
                     float(fi["badly_poisoned_level"]) * moves.damage_multiplier_badly_poison)
@@ -332,7 +330,7 @@ def determine_stats(f):
         s *= nature_multiplier
         f[stat] = int(s)
 
-def reset_stat_changes(fighter):
+def reset_stat_changes(fr):
     for s in [
         "curr_stage_phy_att",
         "curr_stage_phy_def",
@@ -342,7 +340,7 @@ def reset_stat_changes(fighter):
         "curr_stage_accuracy",
         "curr_stage_evasion"
     ]:
-        s = 0
+        fr[s] = 0
 
 def debug_print(fighter_a, fighter_b):
     print("\n-- Fighters' Stats: --\n")

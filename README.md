@@ -22,7 +22,8 @@ Play it in the terminal!
 - Specialized effect moves and abilities
 - Attack damage formula factoring in levels, types, IVs, EVs, status effect, etc.
 - All IVs are 31 by default.
-- Fighters, moves, abilities, and types loaded in via JSON/CSV.
+- Fighters, moves, and abilities are loaded in via JSON.
+- Type effectiveness chart is loaded in via CSV.
 - Cicada Husk Ghost HP limiter
 - New moves: [scrape(), analyzed_impale()]
 - New ability: Soup Burst
