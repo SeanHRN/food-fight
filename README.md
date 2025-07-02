@@ -14,7 +14,7 @@ Play it in the terminal!
 
 <br>
 
-<h3>Rice Ninja</h3>
+<h3>Rice Ninja - The Amylopectin Assassin</h3>
 Type: Grass/Dark
 <br>Food: Onigiri
 <br>Description: Physical Attacker
@@ -28,7 +28,7 @@ Moves
 	- +1 Priority, 3 Hits
 - U-turn (Bug)
 
-<h3>Soup Dumpling</h3>
+<h3>Soup Dumpling - The Hydraulic Crawler</h3>
 Type: Water/Fire
 <br>Food: Soup Dumpling
 <br>Description: Tanky Physical Attacker
@@ -41,7 +41,7 @@ Moves
 - Heat Crash (Fire)
 - Lunge (Bug)
 
-<h3>Dinuguanggal</h3>
+<h3>Dinuguanggal - The Atramentous Autotomy</h3>
 Type: Dark/Poison
 <br>Food: Dinuguan
 <br>Description: Special Attack Sweeper
@@ -57,7 +57,7 @@ Moves
 - Acid Spray (Poison)
 
 
-<h3>LaabGai</h3>
+<h3>LaabGai - The Nine-Limb Set</h3>
 Types: Fighting/Dragon
 <br>Food: Laab Gai (Chicken Laab)
 <br>Description: Extreme Physical Attack and Speed
@@ -67,7 +67,7 @@ Moves
 
 - Drum Solo (Fighting)
 	- "The user punches and kicks the opponent at blistering speed. It works only once when the user is in battle."
-		- +2 Priority
+		- +2 Priority, and it's a sound move, so it gets boosted by Punk Rock.
 - Mach Punch (Fighting)
 - Later Gator (Dragon)
 	- It's U-turn but Dragon type, so he gets STAB.
@@ -83,8 +83,6 @@ Moves
 
 - Stat changes
 
-- Basic moves
-
 - Abilities
 
 - Status effects (poison, bad poison, and burn)
@@ -93,7 +91,7 @@ Moves
 
 - Attack damage formula factoring in levels, types, IVs, EVs, status effect, etc.
 
-- All IVs are 31 by default.
+- All IVs are set to 31.
 
 - Fighters, moves, and abilities are loaded in via JSON.
 
@@ -101,9 +99,11 @@ Moves
 
 - Cicada Husk Ghost HP limiter
 
-- New moves: [scrape(), analyzed_impale(), Drum Solo, Later Gator]
+- New moves: [scrape(), analyzed_impale(), Rice Shuriken, Drum Solo, Later Gator]
 
 - New ability: Soup Burst
+
+- View description of a move by typing [number of the move] + i.
 
   
 
@@ -116,6 +116,7 @@ Moves
 - Make accuracy check do things other than return True
 
 - Add weather to calculations
+
 - Check the soup burst case where Soup Dumpling's HP is reduced by poison/burn instead of being hit. 
 
 - Work in progress characters:
@@ -126,7 +127,7 @@ Moves
 
 - Forest Lizard
 
-  
+
 
 ## How To Play ##
 
