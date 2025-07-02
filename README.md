@@ -18,7 +18,7 @@ Play it in the terminal!
 Type: Grass/Dark
 <br>Food: Onigiri
 <br>Description: Physical Attacker
-<br>Ability: To Be Decided
+<br>Ability: Adaptability
 
 Moves
 

@@ -62,6 +62,11 @@ def check_soup_burst(attacker, move, target):
             target["sd_counter_win"] = True
     return 1
 
+def check_adaptability(user, move):
+    if specific_moves.moves_dict[move]["type"] in user["types"]:
+        print(user["name"] + "'s " + move.title() + " is boosted by Adaptability!")
+        return 2
+    return 1.5
 
 def check_technician(user, move):
     if specific_moves.moves_dict[move]["power"] <= 60:

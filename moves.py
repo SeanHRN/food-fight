@@ -137,6 +137,19 @@ def ability_check_category_1(user, move):
     except KeyError:
         return 1
 
+def ability_check_category_2(user, move):
+    '''
+    For abilities that boost STAB
+    '''
+    try:
+        ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
+        if user["ability"] in abilities.ability_category_set[2]:
+            curr_ability_function = getattr(abilities, ability_function)
+            return curr_ability_function(user, move)
+        return 1.5
+    except KeyError:
+        return 1.5
+
 def ability_check_category_3(user, move, target):
     '''
     For abilities that reduce the power of the move the target receives.
@@ -252,9 +265,9 @@ def calculate_interaction(move, user, target):
         damage *= 0.5
         print("Damage reduced because " + user["name"] + " is burned!")
 
-    # STAB
+    # STAB - The ability check returns 1.5 by default.
     if specific_moves.moves_dict[move]["type"] in user["types"]:
-        damage *= 1.5
+        damage *= ability_check_category_2(user, move)
 
     # Type Effectiveness
     type_multiplier = 1.0

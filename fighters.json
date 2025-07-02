@@ -43,7 +43,7 @@
     "base_spec_att" : 40,
     "base_spec_def" : 40,
     "base_speed" : 120,
-    "ability"  : "none",
+    "ability"  : "adaptability",
     "move_0"   : "leaf blade",
     "move_1"   : "sucker punch",
     "move_2"   : "rice shuriken",

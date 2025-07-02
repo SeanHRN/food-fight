@@ -19,6 +19,12 @@
         "effect_function" : "check_punk_rock",
         "description" : "Boosts the power of sound-based moves. The user also takes half the damage from these kinds of moves.",
         "alt_effect_function" : "alt_check_punk_rock"
+    },
+    {
+        "name" : "adaptability",
+        "category" : 2,
+        "effect_function" : "check_adaptability",
+        "description" : "Powers up moves of the same type as the fighter."
     }
     ]
 }
