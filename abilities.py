@@ -51,7 +51,7 @@ def check_soup_burst(attacker, move, target):
         target["state_ability_activated"] = True
         print(target["name"] + " bursted scalding soup!")
         specific_moves.change_stats(target, ["phy_att","phy_def","spec_att","spec_def","speed"], \
-                                    [-3,-3,-3,-3,-3])
+                                    [-2,-2,-2,-2,-2])
         if specific_moves.moves_dict[move]["attr_makes_contact"] is True:
             print(attacker["name"] + " is splashed with soup!")
             moves.calculate_interaction("scald", target, attacker)
