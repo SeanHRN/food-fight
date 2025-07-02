@@ -70,15 +70,8 @@ def check_round_start(fighter_a, fighter_b):
     for f in l:
         f["state_protect"] = False
 
-def check_ability(fighter_a, fighter_b):
-    l = [fighter_a, fighter_b]
-    for index,f in enumerate(l):
-        abilities.check_soup_burst(f, l[1-index])
-
-
 def check_round_middle(fighter_a, fighter_b):
     check_print_hp(fighter_a, fighter_b)
-    check_ability(fighter_a, fighter_b)
     for f in [fighter_a, fighter_b]:
         if f["curr_hp"] <= 0:
             print("\n" + f["name"] + " fainted!")
@@ -428,13 +421,13 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[4].copy()]
+    team_a = [roster[1].copy(), roster[2].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
         f["team"] = team_a
 
-    team_b = [roster[1].copy(), roster[2].copy(), roster[3].copy()]
+    team_b = [roster[3].copy(), roster[4].copy()]
 
     for slot,f in enumerate(team_b):
         f["team_slot"] = slot

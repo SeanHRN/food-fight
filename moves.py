@@ -133,24 +133,29 @@ def ability_check_category_1(user, move):
         if user["ability"] in abilities.ability_category_set[1]:
             curr_ability_function = getattr(abilities, ability_function)
             return curr_ability_function(user, move)
+        return 1
     except KeyError:
         return 1
 
-def ability_check_category_3(target, move):
+def ability_check_category_3(user, move, target):
     '''
     For abilities that reduce the power of the move the target receives.
+    It checks the alt effect function first, because I'm making abilities that
+    affect both offense and defense use the alt effect function for defense.
+    Just for consistency with the other functions, 'user' refers to the attacker,
+    as opposed to the target, who is the user of this ability.
+    The ability functions may use the term "attacker" instead of user.
     '''
     try:
-        if abilities.abilities_dict[target["ability"]]["alt_effect_function"] != "none":
-            ability_function = abilities.abilities_dict[target["ability"]]["alt_effect_function"]
-        else:
-            ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
-        if target["ability"] in abilities.ability_category_set[3]:
-            curr_ability_function = getattr(abilities, ability_function)
-            return curr_ability_function(target, move)
-    except KeyError:
-        return 1
+        ability_function = abilities.abilities_dict[target["ability"]]["alt_effect_function"]
+    except KeyError: # No alt function, so use the regular one, which should be category 3.
+        ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
+    if target["ability"] in abilities.ability_category_set[3]:
+        curr_ability_function = getattr(abilities, ability_function)
+        return curr_ability_function(user, move, target)
     return 1
+
+
 
 def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
     '''
@@ -236,8 +241,8 @@ def calculate_interaction(move, user, target):
 
     damage = (((user["level"] * 2) / 5) + 2) * move_power
 
-    # Ability Check Category 3: Defense abilities
-    damage *= ability_check_category_3(target, move)
+    # Ability Check Category 3: Defense abilities and Counter abilities
+    damage *= ability_check_category_3(user, move, target)
 
     damage *= (attack_stat_to_use/def_stat_to_use)
     damage /= 50

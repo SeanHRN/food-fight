@@ -21,8 +21,8 @@ if os.path.isfile("fighters.json"):
  # 0: Unused
  # 1: Multiplier for move power
  # 2: Multiplier for STAB
- # 3: Multiplier for damage reduction
- # 4: Counter damage
+ # 3: Multiplier for damage reduction OR it's a counter ability
+ # 4: Other (To Be Determined)
  # 5: Other (To Be Determined)
 ability_category_set = [set() for _ in range(5)]
 abilities_dict = {}
@@ -46,19 +46,21 @@ def check_print_hp(fighterA, fighterB):
     print(fighterA["name"] + " HP: " + str(fighterA["curr_hp"]))
     print(fighterB["name"] + " HP: " + str(fighterB["curr_hp"]))
 
-def check_soup_burst(user, target):
-    if user["ability"].lower() == "soup burst" and user["curr_hp"] <= (user["hp"]/2) and user["state_ability_activated"] is False:
-        user["state_ability_activated"] = True
-        print(user["name"] + " bursted soup!")
-        specific_moves.change_stats(user, ["phy_att","phy_def","spec_att","spec_def","speed"], [-3,-3,-3,-3,-3])
-
-        if specific_moves.moves_dict[target["queued_move"]]["attr_makes_contact"] is True:
-            moves.calculate_interaction("scald", user, target)
-            check_print_hp(user, target)
+def check_soup_burst(attacker, move, target):
+    if target["curr_hp"] <= (target["hp"]/2) and target["state_ability_activated"] is False:
+        target["state_ability_activated"] = True
+        print(target["name"] + " bursted scalding soup!")
+        specific_moves.change_stats(target, ["phy_att","phy_def","spec_att","spec_def","speed"], \
+                                    [-3,-3,-3,-3,-3])
+        if specific_moves.moves_dict[move]["attr_makes_contact"] is True:
+            print(attacker["name"] + " is splashed with soup!")
+            moves.calculate_interaction("scald", target, attacker)
+            check_print_hp(attacker, target)
         else:
-            print(target["name"] + " avoided the soup!")
-        if user["curr_hp"] <= 0 and target["curr_hp"] <= 0:
-            user["sd_counter_win"] = True
+            print(attacker["name"] + " avoided the soup!")
+        if attacker["curr_hp"] <= 0 and target["curr_hp"] <= 0:
+            target["sd_counter_win"] = True
+    return 1
 
 
 def check_technician(user, move):
@@ -76,7 +78,7 @@ def check_punk_rock(user, move):
         return 1.3
     return 1
 
-def alt_check_punk_rock(target, move):
+def alt_check_punk_rock(user, move, target):
     '''
     For defense part of Punk Rock 
     '''
