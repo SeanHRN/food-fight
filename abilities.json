@@ -25,6 +25,12 @@
         "category" : 2,
         "effect_function" : "check_adaptability",
         "description" : "Powers up moves of the same type as the fighter."
+    },
+    {
+        "name" : "skill link",
+        "category" : 4,
+        "effect_function" : "none",
+        "description" : "Maximizes the number of times multistrike moves hit."
     }
     ]
 }

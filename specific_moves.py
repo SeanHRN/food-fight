@@ -49,9 +49,8 @@ def check_can_be_frozen(user, target):
 def check_accuracy(move_accuracy):
     if random.random() < move_accuracy / 100:
         return True
-    else:
-        print("It missed!")
-        return False
+    print("It missed!")
+    return False
 
 
 def print_stat_level_change(target, stats, levels): # levels before the change, not after

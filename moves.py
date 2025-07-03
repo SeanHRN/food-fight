@@ -208,7 +208,10 @@ def calculate_interaction(move, user, target):
     damage = 0
     move_power = specific_moves.moves_dict[move]["power"]
     # Irregular Effect
-    move_function = specific_moves.moves_dict[move]["effect_function"]
+    try:
+        move_function = specific_moves.moves_dict[move]["effect_function"]
+    except KeyError:
+        move_function = "none"
 
     if move_function != "none":
         curr_irregular_move_function = getattr(specific_moves, move_function)

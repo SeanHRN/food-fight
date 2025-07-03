@@ -2,7 +2,7 @@
 
 Legally Distinct Portable Fighting Monster Battle System In Python
 
-v0.2
+v0.3
 
 <br>
 
@@ -73,6 +73,19 @@ Moves
 	- It's U-turn but Dragon type, so he gets STAB.
 - Belly Drum (Normal)
 
+<h3>Halo-Halo - The Ice-Cold Mix-Ups</h3>
+Types: Water/Ice
+<br>Food: Halo-Halo
+<br>Description: Multi-hitter
+<br>Ability: Skill Link
+
+Moves
+
+- Chilling Water (Water)
+- Icicle Spear (Ice)
+- Hydro Pump (Water)
+- Aqua Jet (Water)
+
 ## Features ##
 
 - Turn-based battle system with speed and priority
@@ -120,8 +133,6 @@ Moves
 - Check the soup burst case where Soup Dumpling's HP is reduced by poison/burn instead of being hit. 
 
 - Work in progress characters:
-
-- Halo-Halo
 
 - Gangster Punk Lizard
 

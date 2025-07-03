@@ -309,6 +309,19 @@
         "attr_bypass_protect" : false
     },
     {
+        "name" : "icicle spear",
+        "type" : "ice",
+        "category" : "physical",
+        "pp"   : 48,
+        "power" : 25,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : "variable_type_1",
+        "attr_makes_contact" : false,
+        "description" : "The user attacks by launching sharp icicles at the target. This move hits two to five times in a row.",
+        "attr_bypass_protect" : false
+    },
+    {
         "name"     : "ice punch",
         "type"     : "ice",
         "category" : "physical",

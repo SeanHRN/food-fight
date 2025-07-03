@@ -9,6 +9,8 @@ import moves
 import specific_moves
 import abilities
 import re
+import numbers
+
 sys.path.append(os.getcwd())
 
 
@@ -21,6 +23,19 @@ def case_change(move):
 def test_character(f):
     print(f["curr_hp"])
     print(f["move_0"])
+
+def check_multi_hit_variable_type_1(user):
+    if user["ability"] == "skill link":
+        print(user["name"] + "'s attack is boosted by Skill Link!")
+        return 5
+    random_number = random.random()
+    if random_number <= .125:
+        return 5
+    if random_number <= .25:
+        return 4
+    if random_number <= .375:
+        return 3
+    return 2
 
 def do_turn(user, move, target):
     # By using check_round_middle,
@@ -43,7 +58,15 @@ def do_turn(user, move, target):
     # Uses a loop so that multi-hit moves can work.
     elif specific_moves.moves_dict[move]["category"] != "status":
         if moves.protect_check(user, move, target) is False:
-            for _ in itertools.repeat(None, specific_moves.moves_dict[move]["instances"]):
+            try:
+                curr_instances = specific_moves.moves_dict[move]["instances"]
+                if not isinstance(curr_instances, numbers.Number):
+                    if curr_instances == "variable_type_1":
+                        curr_instances = check_multi_hit_variable_type_1(user)
+            except KeyError:
+                curr_instances = 1
+
+            for _ in itertools.repeat(None, curr_instances):
                 move_output = moves.calculate_interaction(move, user, target)
                 if move in moves.u_turn_set and move_output in range(len(user["team"])):
                     return False, move_output
@@ -421,7 +444,7 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[1].copy(), roster[2].copy()]
+    team_a = [roster[5].copy(), roster[2].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
