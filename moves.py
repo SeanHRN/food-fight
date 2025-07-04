@@ -296,6 +296,11 @@ def calculate_interaction(move, user, target):
     target["curr_hp"] -= int(damage)
     target["curr_hp"] = max(0, target["curr_hp"])
 
+    # Thaw Check
+    if specific_moves.moves_dict[move]["type"] == "fire" and target["status"] == "freeze":
+        target["status"] = "none"
+        print(target["name"] + " thawed out!")
+
     if move in healing_attack_set:
         try:
             heal_function = specific_moves.moves_dict[move]["heal_effect_function"]

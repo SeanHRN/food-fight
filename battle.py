@@ -448,13 +448,14 @@ if os.path.isfile("fighters.json"):
             fighter_temp["pps"] = \
                 [fighter_temp["pp_0"],fighter_temp["pp_1"],\
                  fighter_temp["pp_2"],fighter_temp["pp_3"]]
+
             roster[fighter_temp["id"]] = fighter_temp
         if fighter_data:
             BATTLE_CAN_HAPPEN = True
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[6].copy(), roster[2].copy()]
+    team_a = [roster[2].copy(), roster[6].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
