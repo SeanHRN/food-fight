@@ -223,6 +223,38 @@
     "ev_spec_def" : 0,
     "ev_speed" : 0,
     "nature" : "jolly"
+    },
+    {
+    "id"       : 7,
+    "trainer"  : "",
+    "name"    : "Raghoul",
+    "types"     : ["fire","ghost"],
+    "base_hp"  : 65,
+    "base_phy_att" : 70,
+    "base_phy_def" : 115,
+    "base_spec_att" : 120,
+    "base_spec_def" : 115,
+    "base_speed" : 58,
+    "ability"  : "none",
+    "move_0"   : "will-o-wisp",
+    "move_1"   : "hex",
+    "move_2"   : "",
+    "move_3"   : "",
+    "weight"   : 30.0,
+    "level"    : 100,
+    "iv_hp"    : 31,
+    "iv_phy_att"  : 31,
+    "iv_phy_def"  : 31,
+    "iv_spec_att" : 31,
+    "iv_spec_def" : 31,
+    "iv_speed"    : 31,
+    "ev_hp" : 252,
+    "ev_phy_att" : 252,
+    "ev_phy_def" : 0,
+    "ev_spec_att" : 4,
+    "ev_spec_def" : 0,
+    "ev_speed" : 0,
+    "nature" : "jolly"
     }
     ]
 }
