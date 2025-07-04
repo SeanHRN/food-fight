@@ -135,11 +135,12 @@
         "accuracy" : 100,
         "priority" : 0,
         "instances" : 1,
-        "effect_function" : "move_drain_punch",
+        "effect_function" : "none",
+        "heal_effect_function" : "heal_move_drain_punch",
         "attr_makes_contact" : true,
         "description" : "The user attacks with an energy-draining punch. The user's HP is restored by up to half the damage taken by the target.",
         "attr_bypass_protect" : false
-    }
+    },
     {
         "name"     : "protect",
         "type"     : "normal",

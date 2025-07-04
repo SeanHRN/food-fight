@@ -22,7 +22,6 @@ def case_change(move):
 
 def test_character(f):
     print(f["curr_hp"])
-    print(f["move_0"])
 
 def check_multi_hit_variable_type_1(user):
     if user["ability"] == "skill link":
@@ -46,6 +45,15 @@ def do_turn(user, move, target):
     # Third return value: 
     # TODO: Check when U-Turn defeats an opponent.
     print("\n--------------")
+    # Experimental: Freeze/Paralysis Status
+    if user["status"] == "freeze":
+        freeze_number = random.random()
+        if freeze_number <= .2:
+            user["status"] = "none"
+            print(user["name"] + " thawed out!")
+        else:
+            print(user["name"] + " is frozen solid!")
+            return False, 10
     print(user["name"] + " used " + case_change(move) + "!\n")
 
     if not move in specific_moves.moves_dict:
@@ -116,6 +124,7 @@ def check_round_end(fighter_a, fighter_b):
         elif fi["status"] == "burn":
             fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_burn)
         fi["curr_hp"] = max(0, fi["curr_hp"])
+
 
 
 
@@ -446,7 +455,7 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[5].copy(), roster[2].copy()]
+    team_a = [roster[6].copy(), roster[2].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
@@ -495,6 +504,7 @@ if BATTLE_CAN_HAPPEN:
 
         print("Fight: <<< " + \
               team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
+        check_print_hp(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]])
         battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
         #print("checking battle_output[0]: " + battle_output[0])
         #print("battle output: ")

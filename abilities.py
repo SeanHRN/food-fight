@@ -41,6 +41,8 @@ if os.path.isfile("abilities.json"):
             abilities_dict[ability_temp["name"]] = ability_temp
 
 
+print (ability_category_set)
+
 def check_print_hp(fighterA, fighterB):
     # Copy of the function to avoid cyclical import
     print(fighterA["name"] + " HP: " + str(fighterA["curr_hp"]))
@@ -75,7 +77,7 @@ def check_technician(user, move):
     return 1
 
 def check_moxie(user, move, target):
-    if move["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
+    if specific_moves.moves_dict[move]["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
         specific_moves.change_stats(user, ["phy_att"], [1])
 
 def check_punk_rock(user, move):

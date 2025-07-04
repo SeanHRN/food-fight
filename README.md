@@ -86,6 +86,19 @@ Moves
 - Hydro Pump (Water)
 - Aqua Jet (Water)
 
+
+<h3>Bonus: Gangster Punk Lizard</h3>
+Types: Dark/Fighting
+<br>Description: Physical Attack Sweeper With Bulk
+<br>Ability: Moxie
+
+Moves
+
+- Ice Punch (Ice)
+- Drain Punch (Fighting)
+- Dragon Dance (Dragon)
+- Crunch (Dark)
+
 ## Features ##
 
 - Turn-based battle system with speed and priority
@@ -130,11 +143,7 @@ Moves
 
 - Check the soup burst case where Soup Dumpling's HP is reduced by poison/burn instead of being hit. 
 
-- Work in progress characters:
-
-- Gangster Punk Lizard
-
-- Forest Lizard
+- Upcoming characters: Raghoul, Forest Lizard
 
 
 

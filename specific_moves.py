@@ -101,7 +101,10 @@ def self_thaw(user):
 
 def print_status_effect(target, status, already):
     if not already:
-        print(target["name"] + " is " + status + "ed!")
+        if not status is "freeze":
+            print(target["name"] + " is " + status + "ed!")
+        else:
+            print(target["name"] + " is frozen solid!")
     else:
         print(target["name"] + " is already " + status + "ed!")
 
@@ -111,7 +114,7 @@ def print_ability_protect(user):
 def change_volatile_status_effect(target, status):
     if target["status"] == "none":
         target["status"] = status
-        print_status_effect(target,status, False)
+        print_status_effect(target, status, False)
 
 ### Attack/Contact Moves ###
 
@@ -147,17 +150,6 @@ def move_crunch(user, target):
     if check_accuracy(moves_dict["crunch"]["accuracy"]):
         if random.random() < 0.2:
             change_stats(target, ["phy_def"], [-1])
-        return [2,0,0]
-    return [1,0,0]
-
-def move_drain_punch(user, target):
-    '''
-    TODO: Fill out this move to utilize the damage calculation
-    to get the correct HP.
-    '''
-    if check_accuracy(moves_dict["drain punch"]["accuracy"]):
-        healing_amount = calculate_interaction_damage_only("drain punch", user, target)
-        user["curr_hp"] += 0
         return [2,0,0]
     return [1,0,0]
 
@@ -200,9 +192,6 @@ def move_ice_punch(user, target):
 def move_lunge(user, target):
     if check_accuracy(moves_dict["lunge"]["accuracy"]):
         change_stats(target, ["phy_att"], [-1])
-        #if check_can_change_stat(target, "phy_att", -1):
-        #    target["curr_stage_phy_att"] -= 1
-        #    print_stat_level_change(target, ["phy_att"], [-1])
         return [2,0,0]
     return [1,0,0]
 
@@ -316,31 +305,21 @@ def move_protect(user):
 
 
 
+def heal_move_drain_punch(user, target, damage):
+    heal_amount = int(damage * 0.5)
+    if damage == 1:
+        heal_amount = 1
+    try:
+        if user["held_item"] == "big root":
+            heal_amount = int(heal_amount * 1.3)
+    except KeyError:
+        pass
 
-
-# Swapping Out Fighter
-##def move_recall(current_fighter):
-##    print("hi")
-    #for t in current_fighter["team"]:
-    #    print(str(t["team_slot"]) + ": " + t["name"])
-    #choice = input("Which teammate?\n")
-
-#    print(current_fighter["name"] + " is going back!")
-#    usable_range = list(range(len(current_fighter["team"])))
-#    usable_range.remove(current_fighter["team_slot"])
-#    next_f = 999
-#    while int(next_f) not in usable_range:
-#        for ic in usable_range:
-#            print(str(ic) + ": " + current_fighter["team"][ic]["name"])
-#        next_f = input("Which character?\n")
-
-
-
-                #print("Recall for team A:")
-                #usable_range = [0, 1]
-                #usable_range.remove(fighter_a["team_slot"])
-                #next_f = 999
-                #while int(next_f) not in usable_range:
-                #    for ic in usable_range:
-                #        print(str(ic) + ": " + team_a[ic]["name"])
-                #    next_f = input("Which character?\n")
+    if user["curr_hp"] != user["hp"]:
+        if target["ability"] != "liquid ooze":
+            user["curr_hp"] = min(user["curr_hp"]+heal_amount, user["hp"])
+            print(user["name"] + "'s HP is now: " + str(user["curr_hp"]))
+            print("Healed by " + str(heal_amount) + " points.")
+        else:
+            user["curr_hp"] = max(user["curr_hp"]-heal_amount, 0)
+            print(target["name"] + "'s Liquid Ooze made " + user["name"] + " lose " + str(heal_amount) + " points!")

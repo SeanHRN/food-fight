@@ -27,6 +27,8 @@ dinu_moves_set = {"scrape()", "analyzed_impale()"}
 
 u_turn_set = {"u-turn", "later gator", "volt switch", "flip turn"}
 
+healing_attack_set = {"drain punch"}
+
 damage_multiplier_poison = 1/8
 damage_multiplier_badly_poison = 1/16
 damage_multiplier_burn = 1/16
@@ -173,7 +175,7 @@ def ability_check_category_5(user, move, target):
     For abilities that activate when an opponent is knocked out.
     '''
     if user["ability"] in abilities.ability_category_set[5]:
-        ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
+        ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
         curr_ability_function = getattr(abilities, ability_function)
         curr_ability_function(user, move, target)
 
@@ -293,6 +295,14 @@ def calculate_interaction(move, user, target):
     # Damage Subtraction
     target["curr_hp"] -= int(damage)
     target["curr_hp"] = max(0, target["curr_hp"])
+
+    if move in healing_attack_set:
+        try:
+            heal_function = specific_moves.moves_dict[move]["heal_effect_function"]
+            heal_function = getattr(specific_moves, heal_function)
+            heal_function(user, target, damage)
+        except KeyError:
+            print("Heal function not found for healing attack.")
 
     match type_multiplier:
         case 2.0 | 4.0:
