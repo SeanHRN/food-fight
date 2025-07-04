@@ -101,7 +101,7 @@ def self_thaw(user):
 
 def print_status_effect(target, status, already):
     if not already:
-        if not status is "freeze":
+        if status != "freeze":
             print(target["name"] + " is " + status + "ed!")
         else:
             print(target["name"] + " is frozen solid!")

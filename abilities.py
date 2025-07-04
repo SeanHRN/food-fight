@@ -40,9 +40,6 @@ if os.path.isfile("abilities.json"):
                         ability_category_set[value].add(ability_temp["unnamed ability"])
             abilities_dict[ability_temp["name"]] = ability_temp
 
-
-print (ability_category_set)
-
 def check_print_hp(fighterA, fighterB):
     # Copy of the function to avoid cyclical import
     print(fighterA["name"] + " HP: " + str(fighterA["curr_hp"]))

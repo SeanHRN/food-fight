@@ -85,7 +85,7 @@ def do_turn(user, move, target):
 def check_print_hp(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
     for f in l:
-        print(f["name"] + " HP: " + str(f["curr_hp"]))
+        print("   " + f["name"] + " HP: " + str(f["curr_hp"]))
 
 def check_print_status(fighter_a, fighter_b):
     l = [fighter_a, fighter_b]
@@ -96,7 +96,6 @@ def check_print_status(fighter_a, fighter_b):
                 print(s)
 
 def check_round_start(fighter_a, fighter_b):
-    #print("check round start")
     l = [fighter_a, fighter_b]
     for f in l:
         f["state_protect"] = False
