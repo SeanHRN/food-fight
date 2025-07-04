@@ -126,8 +126,6 @@ Moves
 
 - Add held items
 
-- Make accuracy check do things other than return True
-
 - Add weather to calculations
 
 - Check the soup burst case where Soup Dumpling's HP is reduced by poison/burn instead of being hit. 

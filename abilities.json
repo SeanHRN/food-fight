@@ -31,6 +31,12 @@
         "category" : 4,
         "effect_function" : "none",
         "description" : "Maximizes the number of times multistrike moves hit."
+    },
+    {
+        "name" : "moxie",
+        "category" : 5,
+        "effect_function" : "check_moxie",
+        "description" : "Boosts physical attack whenever the user knocks out an opponent."
     }
     ]
 }

@@ -168,6 +168,14 @@ def ability_check_category_3(user, move, target):
         return curr_ability_function(user, move, target)
     return 1
 
+def ability_check_category_5(user, move, target):
+    '''
+    For abilities that activate when an opponent is knocked out.
+    '''
+    if user["ability"] in abilities.ability_category_set[5]:
+        ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
+        curr_ability_function = getattr(abilities, ability_function)
+        curr_ability_function(user, move, target)
 
 
 def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
@@ -188,11 +196,9 @@ def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
             return phy_a, phy_d
         elif (forecast_phy_att/phy_d) < (forecast_spec_att/spec_d):
             return spec_a, spec_d
-        else:
-            if random.random() < 0.5:
-                return phy_a, phy_d
-            else:
-                return spec_a, spec_d
+        if random.random() < 0.5:
+            return phy_a, phy_d
+        return spec_a, spec_d
     # Default
     if specific_moves.moves_dict[move]["category"] == "physical":
         return phy_a, phy_d
@@ -201,9 +207,15 @@ def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
 
 def calculate_interaction(move, user, target):
     '''
+    Inputs:
+        move
+        user
+        target
+
     Return Values:
         [0-5] : The user U-turned, and the number is the replacement picked.
         10    : Normal output; no special instruction.
+        Other : Just the damage, when damage_only is True.
     '''
     damage = 0
     move_power = specific_moves.moves_dict[move]["power"]

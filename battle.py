@@ -291,9 +291,11 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
 
     if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
+        moves.ability_check_category_5(fighter_a, fighter_a["queued_move"], fighter_b)
         fighter_b["koed"] = True
         return "fighter_b_defeated", 0, [0]
     if fighter_b["curr_hp"] > 0 >= fighter_a["curr_hp"]:
+        moves.ability_check_category_5(fighter_b, fighter_b["queued_move"], fighter_a)
         fighter_a["koed"] = True
         return "fighter_a_defeated", 0, [0]
     if fighter_a["curr_hp"] == fighter_b["curr_hp"] == 0: # Tie Breakers

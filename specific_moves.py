@@ -150,6 +150,17 @@ def move_crunch(user, target):
         return [2,0,0]
     return [1,0,0]
 
+def move_drain_punch(user, target):
+    '''
+    TODO: Fill out this move to utilize the damage calculation
+    to get the correct HP.
+    '''
+    if check_accuracy(moves_dict["drain punch"]["accuracy"]):
+        healing_amount = calculate_interaction_damage_only("drain punch", user, target)
+        user["curr_hp"] += 0
+        return [2,0,0]
+    return [1,0,0]
+
 def move_drum_solo(user, target):
     '''
     TODO: The fighter switch system will need to be able to refresh this.

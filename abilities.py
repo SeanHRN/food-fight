@@ -24,7 +24,7 @@ if os.path.isfile("fighters.json"):
  # 3: Multiplier for damage reduction OR it's a counter ability
  # 4: Other (To Be Determined)
  # 5: Other (To Be Determined)
-ability_category_set = [set() for _ in range(5)]
+ability_category_set = [set() for _ in range(6)]
 abilities_dict = {}
 if os.path.isfile("abilities.json"):
     with open("abilities.json", "r", encoding="UTF-8") as ability_file:
@@ -73,6 +73,10 @@ def check_technician(user, move):
         print(user["name"] + "'s " + move.title() + " is boosted by Technician!")
         return 1.5
     return 1
+
+def check_moxie(user, move, target):
+    if move["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
+        specific_moves.change_stats(user, ["phy_att"], [1])
 
 def check_punk_rock(user, move):
     '''
