@@ -271,9 +271,6 @@ def calculate_interaction(move, user, target):
 
     damage = (((user["level"] * 2) / 5) + 2) * move_power
 
-    # Ability Check Category 3: Defense abilities and Counter abilities
-    damage *= ability_check_category_3(user, move, target)
-
     damage *= (attack_stat_to_use/def_stat_to_use)
     damage /= 50
 
@@ -291,6 +288,9 @@ def calculate_interaction(move, user, target):
     for t in target["types"]:
         type_multiplier *= float(types_dict[specific_moves.moves_dict[move]["type"]][t])
     damage *= type_multiplier
+
+    # Ability Check Category 3: Defense abilities and Counter abilities
+    damage *= ability_check_category_3(user, move, target)
 
     # Damage Subtraction
     target["curr_hp"] -= int(damage)

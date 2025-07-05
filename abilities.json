@@ -37,6 +37,12 @@
         "category" : 5,
         "effect_function" : "check_moxie",
         "description" : "Boosts physical attack whenever the user knocks out an opponent."
+    },
+    {
+        "name" : "sturdy",
+        "category" : 3,
+        "effect_function" : "check_sturdy",
+        "description" : "User can't be KOed in one hit."
     }
     ]
 }
