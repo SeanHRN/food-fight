@@ -24,7 +24,7 @@ if os.path.isfile("fighters.json"):
  # 3: Multiplier for damage reduction OR it's a counter ability
  # 4: Other (To Be Determined)
  # 5: Other (To Be Determined)
-ability_category_set = [set() for _ in range(6)]
+ability_category_set = [set() for _ in range(7)]
 abilities_dict = {}
 if os.path.isfile("abilities.json"):
     with open("abilities.json", "r", encoding="UTF-8") as ability_file:
@@ -45,7 +45,7 @@ def check_print_hp(fighterA, fighterB):
     print(fighterA["name"] + " HP: " + str(fighterA["curr_hp"]))
     print(fighterB["name"] + " HP: " + str(fighterB["curr_hp"]))
 
-def check_soup_burst(attacker, move, target):
+def check_soup_burst(attacker, move, target, damage):
     if target["curr_hp"] <= (target["hp"]/2) and target["state_ability_activated"] is False:
         target["state_ability_activated"] = True
         print(target["name"] + " bursted scalding soup!")
@@ -59,7 +59,7 @@ def check_soup_burst(attacker, move, target):
             print(attacker["name"] + " avoided the soup!")
         if attacker["curr_hp"] <= 0 and target["curr_hp"] <= 0:
             target["sd_counter_win"] = True
-    return 1
+    return damage
 
 def check_adaptability(user, move):
     if specific_moves.moves_dict[move]["type"] in user["types"]:
@@ -86,11 +86,21 @@ def check_punk_rock(user, move):
         return 1.3
     return 1
 
-def alt_check_punk_rock(user, move, target):
+def alt_check_punk_rock(user, move, target, damage):
     '''
     For defense part of Punk Rock 
     '''
     if "attr_sound" in specific_moves.moves_dict[move] and specific_moves.moves_dict[move]["attr_sound"]:
         print("Damage lowered by " + target["name"] + "'s Punk Rock!")
-        return 0.5
-    return 1
+        return damage * 0.5
+    return damage
+
+def check_sturdy(user, move, target, damage):
+    if target["hp"] == target["curr_hp"] and damage >= target["hp"]:
+        damage = target["hp"] - 1
+        print(target["name"] + " held on with Sturdy!")
+    return damage
+
+def check_intimidate(user, target):
+    print(user["name"] + "'s Intimidate!")
+    specific_moves.change_stats(target,["phy_att"], [-1])

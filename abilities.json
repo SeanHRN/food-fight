@@ -43,6 +43,12 @@
         "category" : 3,
         "effect_function" : "check_sturdy",
         "description" : "User can't be KOed in one hit."
+    },
+    {
+        "name" : "intimidate",
+        "category" : 6,
+        "effect_function" : "check_intimidate",
+        "description" : "Lowers opponent's attack stat when the user enters."
     }
     ]
 }

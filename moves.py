@@ -152,7 +152,7 @@ def ability_check_category_2(user, move):
     except KeyError:
         return 1.5
 
-def ability_check_category_3(user, move, target):
+def ability_check_category_3_OLD(user, move, target):
     '''
     For abilities that reduce the power of the move the target receives.
     It checks the alt effect function first, because I'm making abilities that
@@ -170,6 +170,26 @@ def ability_check_category_3(user, move, target):
         return curr_ability_function(user, move, target)
     return 1
 
+def ability_check_category_3(user, move, target, damage):
+    '''
+    For abilities that reduce the power of the move the target receives.
+    It checks the alt effect function first, because I'm making abilities that
+    affect both offense and defense use the alt effect function for defense.
+    Just for consistency with the other functions, 'user' refers to the attacker,
+    as opposed to the target, who is the user of this ability.
+    The ability functions may use the term "attacker" instead of user.
+    The return value is damage instead of a multiplier, because
+    Sturdy would guarantee 1 HP.
+    '''
+    try:
+        ability_function = abilities.abilities_dict[target["ability"]]["alt_effect_function"]
+    except KeyError: # No alt function, so use the regular one, which should be category 3.
+        ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
+    if target["ability"] in abilities.ability_category_set[3]:
+        curr_ability_function = getattr(abilities, ability_function)
+        return curr_ability_function(user, move, target, damage)
+    return damage
+
 def ability_check_category_5(user, move, target):
     '''
     For abilities that activate when an opponent is knocked out.
@@ -178,6 +198,15 @@ def ability_check_category_5(user, move, target):
         ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
         curr_ability_function = getattr(abilities, ability_function)
         curr_ability_function(user, move, target)
+
+def ability_check_category_6(user, target):
+    '''
+    For abilities that activate when the user enters the battle.
+    '''
+    if user["ability"] in abilities.ability_category_set[6]:
+        ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
+        curr_ability_function = getattr(abilities, ability_function)
+        curr_ability_function(user, target)
 
 
 def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
@@ -290,7 +319,8 @@ def calculate_interaction(move, user, target):
     damage *= type_multiplier
 
     # Ability Check Category 3: Defense abilities and Counter abilities
-    damage *= ability_check_category_3(user, move, target)
+    #damage *= ability_check_category_3(user, move, target)
+    damage = ability_check_category_3(user, move, target, damage)
 
     # Damage Subtraction
     target["curr_hp"] -= int(damage)

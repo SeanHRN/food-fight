@@ -150,6 +150,11 @@ def do_battle(fighter_a, fighter_b, suspend_code):
     #                                               False: - Suspend, so keep the round going.]
     #
     # Check the conditions of the completion of the battle to break ties.
+
+    # EXPERIMENTAL: Abilities on summon
+    moves.ability_check_category_6(fighter_a, fighter_b)
+    moves.ability_check_category_6(fighter_b, fighter_a)
+
     while (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
 
         print()
@@ -456,12 +461,14 @@ if os.path.isfile("fighters.json"):
 if BATTLE_CAN_HAPPEN:
 
     team_a = [roster[1].copy(), roster[2].copy(), roster[3].copy()]
+    #team_a = [roster[4].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
         f["team"] = team_a
 
     team_b = [roster[4].copy(), roster[5].copy(), roster[6].copy()]
+    #team_b = [roster[7].copy()]
 
     for slot,f in enumerate(team_b):
         f["team_slot"] = slot
