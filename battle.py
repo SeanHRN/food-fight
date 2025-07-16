@@ -61,7 +61,7 @@ def do_turn(user, move, target):
         return False
 
     if specific_moves.moves_dict[move]["category"] == "status":
-        moves.do_status_move(user, move)
+        moves.do_status_move(user, move, target)
 
     # Uses a loop so that multi-hit moves can work.
     elif specific_moves.moves_dict[move]["category"] != "status":
@@ -169,7 +169,11 @@ def do_battle(fighter_a, fighter_b, suspend_code):
                 sufficient_pp = False
                 while (selected_move not in fi["moves"] and sufficient_pp is False):
                     # Print the moves.
-                    print("\nTurn: " + fi["name"] + "\n", end="")
+                    status_print = ""
+                    if fi["status"] != "none":
+                        status_print = " [ " + fi["status"].title() + " ]"
+                    print("\n" + fi["name"] + status_print + "\n", end="")
+
                     longest_name_length = len(max(fi["moves"], key=len))
                     longest_type_length = 0
                     for m in fi["moves"]:
@@ -429,6 +433,7 @@ if os.path.isfile("fighters.json"):
             fighter_temp["infatuated"] = False
             fighter_temp["queued_move"] = "blank"
             fighter_temp["previous_move"] = "blank"
+            fighter_temp["substituted"] = False
             fighter_temp["count_protect"] = 0
             fighter_temp["hp"] = 0
             fighter_temp["phy_att"] = 0
@@ -460,14 +465,14 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[1].copy(), roster[2].copy(), roster[3].copy()]
+    team_a = [roster[1].copy(), roster[2].copy(), roster[4].copy()]
     #team_a = [roster[4].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
         f["team"] = team_a
 
-    team_b = [roster[4].copy(), roster[5].copy(), roster[6].copy()]
+    team_b = [roster[3].copy(), roster[5].copy(), roster[6].copy()]
     #team_b = [roster[7].copy()]
 
     for slot,f in enumerate(team_b):

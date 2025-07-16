@@ -21,9 +21,9 @@ if os.path.isfile("fighters.json"):
  # 0: Unused
  # 1: Multiplier for move power
  # 2: Multiplier for STAB
- # 3: Multiplier for damage reduction OR it's a counter ability
- # 4: Other (To Be Determined)
- # 5: Other (To Be Determined)
+ # 3: Modifier for damage reduction OR it's a counter ability
+ # 4: Whatever Skill Link is - variable hit modifier?
+ # 6: Activated upon summon
 ability_category_set = [set() for _ in range(7)]
 abilities_dict = {}
 if os.path.isfile("abilities.json"):

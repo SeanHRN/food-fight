@@ -35,6 +35,14 @@ def check_can_be_poisoned(user, target):
         case _:
             return 2
 
+def check_can_be_burned(user, target):
+    if "fire" in target["types"]\
+        or target["ability"] == "water veil" \
+            or target["substituted"] is True \
+                or target["status"] != "none":
+        return False
+    return True
+
 def check_can_be_frozen(user, target):
     #if battle.curr_weather == "harsh sunlight":
     #    return False
@@ -265,20 +273,20 @@ def move_u_turn(user, target):
 
 # Status Moves
 
-def move_autotomize(user):
+def move_autotomize(user, target):
     change_stats(user, ["speed"], [2])
     user["weight"] -= 100.0
     if user["weight"] < 0.1:
         user["weight"] = 0.1
 
-def move_belly_drum(user):
+def move_belly_drum(user, target):
     print_stat_level_change(user, ["phy_att"], [6])
     print(user["name"] + "'s HP went down!")
     user["curr_hp"] *= 0.5
     user["curr_hp"] = int(user["curr_hp"])
     user["curr_stage_phy_att"] = 6
 
-def move_dragon_dance(user):
+def move_dragon_dance(user, target):
     change_stats(user, ["phy_att", "speed"], [1, 1])
 
 def move_protect(user):
@@ -303,7 +311,9 @@ def move_protect(user):
     else:
         user["state_protect"] = False
 
-
+def move_will_o_wisp(user, target):
+    if check_accuracy(moves_dict["will-o-wisp"]["accuracy"]) and check_can_be_burned(user, target):
+        target["status"] = "burn"
 
 def heal_move_drain_punch(user, target, damage):
     heal_amount = int(damage * 0.5)

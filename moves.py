@@ -94,6 +94,9 @@ def recall(ft, cancel_allowed):
         for ic in usable_range:
             print(str(ic) + ": " + ft["team"][ic]["name"])
         selected_teammate = int(input("Which character?\n"))
+        # Experimental for Drum Solo -> Hard Code Section
+        if "drum_soloed" in ft:
+            ft["drum_soloed"] = False
     return selected_teammate
 
 def do_u_turn_effect(user):
@@ -114,13 +117,13 @@ def protect_check(user, move, target):
     return False
 
 
-def do_status_move(user, move):
+def do_status_move(user, move, target):
     #print(specific_moves.moves_dict[move]["effect_function"])
     #try:
     move_function = specific_moves.moves_dict[move]["effect_function"]
     if move_function != "none":
         move_function = getattr(specific_moves, move_function)
-        move_function(user)
+        move_function(user, target)
         #return
     #except KeyError:
     #    print("Move Function for " + move + " not found!")

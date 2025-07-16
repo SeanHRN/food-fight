@@ -395,6 +395,20 @@
         "attr_bypass_protect" : false
     },
     {
+        "name"     : "will-o-wisp",
+        "type"     : "ghost",
+        "category" : "status",
+        "pp"       : 24,
+        "power"    : 0,
+        "accuracy" : 85,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_will_o_wisp",
+        "attr_makes_contact" : true,
+        "description" : "Target is burned.",
+        "attr_bypass_protect" : false
+    },
+    {
         "name" : "recall",
         "category" : "alterate",
         "effect_function" : "move_recall",
