@@ -144,16 +144,18 @@ def ability_check_category_1(user, move):
 
 def ability_check_category_2(user, move):
     '''
-    For abilities that boost STAB
+    For abilities that boost STAB or are similar to STAB, such as Rocky Payload
+    Return Values: First:  Addition to the STAB multiplier
+                   Second: Move type change, as applicable
     '''
     try:
         ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
         if user["ability"] in abilities.ability_category_set[2]:
             curr_ability_function = getattr(abilities, ability_function)
             return curr_ability_function(user, move)
-        return 1.5
+        return 0, "none"
     except KeyError:
-        return 1.5
+        return 0, "none"
 
 def ability_check_category_3_OLD(user, move, target):
     '''
@@ -251,6 +253,7 @@ def calculate_interaction(move, user, target):
         10    : Normal output; no special instruction.
         Other : Just the damage, when damage_only is True.
     '''
+    type_to_use = specific_moves.moves_dict[move]["type"]
     damage = 0
     move_power = specific_moves.moves_dict[move]["power"]
     # Irregular Effect
@@ -311,14 +314,22 @@ def calculate_interaction(move, user, target):
         damage *= 0.5
         print("Damage reduced because " + user["name"] + " is burned!")
 
-    # STAB - The ability check returns 1.5 by default.
-    if specific_moves.moves_dict[move]["type"] in user["types"]:
-        damage *= ability_check_category_2(user, move)
+
+    # Basic STAB, Ability STAB, and Ability STAB-like
+    stab = 0
+    stab_add, type_change = ability_check_category_2(user, move)
+    stab += stab_add
+    if type_change != "none":
+        type_to_use = type_change
+    if type_to_use in user["types"]:
+        stab += 1.5
+    damage *= stab
+    print("Total STAB multiplier: " + str(stab)) # Debugging
 
     # Type Effectiveness
     type_multiplier = 1.0
     for t in target["types"]:
-        type_multiplier *= float(types_dict[specific_moves.moves_dict[move]["type"]][t])
+        type_multiplier *= float(types_dict[type_to_use][t])
     damage *= type_multiplier
 
     # Ability Check Category 3: Defense abilities and Counter abilities
@@ -330,7 +341,7 @@ def calculate_interaction(move, user, target):
     target["curr_hp"] = max(0, target["curr_hp"])
 
     # Thaw Check
-    if specific_moves.moves_dict[move]["type"] == "fire" and target["status"] == "freeze":
+    if type_to_use == "fire" and target["status"] == "freeze":
         target["status"] = "none"
         print(target["name"] + " thawed out!")
 

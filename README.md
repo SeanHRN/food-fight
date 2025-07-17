@@ -2,7 +2,7 @@
 
 Legally Distinct Portable Fighting Monster Battle System In Python
 
-v0.31
+v0.32
 
 <br>
 

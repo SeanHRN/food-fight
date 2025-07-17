@@ -62,10 +62,43 @@ def check_soup_burst(attacker, move, target, damage):
     return damage
 
 def check_adaptability(user, move):
+    '''
+    It's 0.5 as an addition to the existing 1.5 STAB.
+    '''
     if specific_moves.moves_dict[move]["type"] in user["types"]:
         print(user["name"] + "'s " + move.title() + " is boosted by Adaptability!")
-        return 2
-    return 1.5
+        return 0.5, "none"
+    return 0, "none"
+
+def check_aerilate(user, move):
+    if specific_moves.moves_dict[move]["type"] == "normal":
+        print(user["name"] + "'s " + move.title() + " is boosted by Aerilate!")
+        return 0.20, "flying"
+    return 0, "none"
+
+def check_pixilate(user, move):
+    if specific_moves.moves_dict[move]["type"] == "normal":
+        print(user["name"] + "'s " + move.title() + " is boosted by Pixilate!")
+        return 0.20, "fairy"
+    return 0, "none"
+
+def check_normalize(user, move):
+    if specific_moves.moves_dict[move]["type"] == "normal":
+        print(user["name"] + "'s " + move.title() + " is boosted by Normalize!")
+        return 0.20, "none"
+    return 0, "none"
+
+def check_refrigerate(user, move):
+    if specific_moves.moves_dict[move]["type"] == "normal":
+        print(user["name"] + "'s " + move.title() + " is boosted by Refrigerate!")
+        return 0.20, "ice"
+    return 0, "none"
+
+def check_galvanize(user, move):
+    if specific_moves.moves_dict[move]["type"] == "normal":
+        print(user["name"] + "'s " + move.title() + " is boosted by Galvanize!")
+        return 0.20, "electric"
+    return 0, "none"
 
 def check_technician(user, move):
     if specific_moves.moves_dict[move]["power"] <= 60:

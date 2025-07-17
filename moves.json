@@ -184,6 +184,20 @@
         "attr_bypass_protect" : false
     },
     {
+        "name" : "tackle",
+        "type" : "normal",
+        "category" : "physical",
+        "pp" : 56,
+        "power" : 40,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "none",
+        "attr_makes_contact" : true,
+        "description" : "Tackles the opponent.",
+        "attr_bypass_protect" : false
+    },
+    {
         "name"     : "scrape()",
         "type"     : "poison",
         "category" : "special",

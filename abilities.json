@@ -49,6 +49,36 @@
         "category" : 6,
         "effect_function" : "check_intimidate",
         "description" : "Lowers opponent's attack stat when the user enters."
+    },
+    {
+        "name" : "aerilate",
+        "category" : 2,
+        "effect_function" : "check_aerilate",
+        "description" : "The user's normal type moves become flying type and get a power boost."
+    },
+    {
+        "name" : "normalize",
+        "category" : 2,
+        "effect_function" : "check_normalize",
+        "description" : "The user's normal type moves get a power boost."
+    },
+    {
+        "name" : "pixilate",
+        "category" : 2,
+        "effect_function" : "check_pixilate",
+        "description" : "The user's normal type moves become fairy type and get a power boost."
+    },
+    {
+        "name" : "refrigerate",
+        "category" : 2,
+        "effect_function" : "check_refrigerate",
+        "description" : "The user's normal type moves become ice type and get a power boost."
+    },
+    {
+        "name" : "galvanize",
+        "category" : 2,
+        "effect_function" : "check_aerilate",
+        "description" : "The user's normal type moves become electric type and get a power boost."
     }
     ]
 }
