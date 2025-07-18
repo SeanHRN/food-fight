@@ -21,10 +21,11 @@ if os.path.isfile("fighters.json"):
  # 0: Unused
  # 1: Multiplier for move power
  # 2: Multiplier for STAB
- # 3: Modifier for damage reduction OR it's a counter ability
+ # 3: Modifier for damage reduction
  # 4: Whatever Skill Link is - variable hit modifier?
  # 6: Activated upon summon
-ability_category_set = [set() for _ in range(7)]
+ # 7: Counter Abilities
+ability_category_set = [set() for _ in range(8)]
 abilities_dict = {}
 if os.path.isfile("abilities.json"):
     with open("abilities.json", "r", encoding="UTF-8") as ability_file:
@@ -106,7 +107,14 @@ def check_technician(user, move):
     return 0
 
 def check_moxie(user, move, target):
-    if move != "blank" and specific_moves.moves_dict[move]["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
+    '''
+    The "blank" check is for making sure that moxie doesn't try to activate when
+    the fighter is swapped in (and therefore wouldn't have a valid attack registered
+    at the end of a round).
+    However, this is only a temporary fix because Moxie shouldn't activate on poison either.
+    #TODO: Make sure a move that missed won't allow this to go through.
+    '''
+    if move != "blank" and specific_moves.moves_dict[move]["category"] != "status":
         specific_moves.change_stats(user, ["phy_att"], [1])
 
 def check_punk_rock(user, move):

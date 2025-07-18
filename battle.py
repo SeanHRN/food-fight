@@ -119,10 +119,13 @@ def check_round_end(fighter_a, fighter_b):
                 fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_poison)
             fi["curr_hp"] = max(0, fi["curr_hp"])
             print(fi["name"] + " is hurt by poison!")
-            print("HP is now: " + str(fi["curr_hp"]))
         elif fi["status"] == "burn":
             fi["curr_hp"] -= int(fi["hp"] * moves.damage_multiplier_burn)
+            print(fi["name"] + " is hurt by burn!")
         fi["curr_hp"] = max(0, fi["curr_hp"])
+        print("HP is now: " + str(fi["curr_hp"]))
+        if fi["curr_hp"] == 0:
+            fi["koed"] = True
 
 
 
@@ -292,16 +295,20 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
             #suspend_code = 0
             #print("Doing normal return completion.")
-            return "completion after suspend", 0, [0]
+            #return "completion after suspend", 0, [0]
 
-        if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
-            check_round_end(fighter_a, fighter_b)
+
+
+
+#        if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
+#            check_round_end(fighter_a, fighter_b) # Poison check happens here.
 
         for fm in [fighter_a, fighter_b]:
             fm["previous_move"] = fm["queued_move"]
         print("- - - - - - - - -")
 
 
+    #TODO: Rework the category 5 check so that it factors in whether a hit actually occurred.
     if fighter_a["curr_hp"] > 0 >= fighter_b["curr_hp"]:
         moves.ability_check_category_5(fighter_a, fighter_a["queued_move"], fighter_b)
         fighter_b["koed"] = True
@@ -316,6 +323,11 @@ def do_battle(fighter_a, fighter_b, suspend_code):
                 f["defeated_opponent"] = True
                 f[1-index]["koed"] = True
         return "fighter_both_defeated", 0, [0]
+
+    if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
+        check_round_end(fighter_a, fighter_b) # Poison check happens here.
+
+
     return "normal_completion", 0, [0]
 
 

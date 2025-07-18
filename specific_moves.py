@@ -65,9 +65,9 @@ def check_accuracy(move_accuracy):
 def print_stat_level_change(target, stats, differences):
     for s, d in zip(stats, differences):
         if d > 0:
-            print(target["name"] + "'s " + s + " increased by " + str(d) + " stage(s)")
+            print(target["name"] + "'s " + s + " increased by " + str(d) + " stage(s)!")
         elif d < 0:
-            print(target["name"] + "'s " + s + " decreased by " + str(d) + " stage(s)")
+            print(target["name"] + "'s " + s + " decreased by " + str(d) + " stage(s)!")
 
 def print_stat_level_change_old(target, stats, levels): # levels before the change, not after
     # Use this only for the print statements. Do not make changes to the stats here.

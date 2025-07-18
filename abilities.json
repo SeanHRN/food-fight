@@ -2,7 +2,7 @@
     "abilities": [
     {
         "name" : "soup burst",
-        "category" : 3,
+        "category" : 7,
         "effect_function" : "check_soup_burst",
         "description" : "When the user's health drops below 50%, it shoots soup, harshly lowering its stats and scalding the opponent if contact was made."
     },

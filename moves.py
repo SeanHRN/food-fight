@@ -181,6 +181,7 @@ def ability_check_category_5(user, move, target):
     For abilities that activate when an opponent is knocked out.
     '''
     if user["ability"] in abilities.ability_category_set[5]:
+        print(user["name"] + "'s " + user["ability"].title() + "!")
         ability_function = abilities.abilities_dict[user["ability"]]["effect_function"]
         curr_ability_function = getattr(abilities, ability_function)
         curr_ability_function(user, move, target)
@@ -194,6 +195,21 @@ def ability_check_category_6(user, target):
         curr_ability_function = getattr(abilities, ability_function)
         curr_ability_function(user, target)
         user["used_entry_ability"] = True
+
+def ability_check_category_7(user, move, target, damage):
+    '''
+    For counter abilities.
+    It used to be part of category 3 (defense), but it had to be split for sequencing
+    purposes. For example, if Drain Punch hits Soup Dumpling to <=50% HP, the Drain Punch
+    heal should happen before Soup Burst.
+    '''
+    try:
+        ability_function = abilities.abilities_dict[target["ability"]]["alt_effect_function"]
+    except KeyError: # No alt function, so use the regular one, which should be category 7.
+        ability_function = abilities.abilities_dict[target["ability"]]["effect_function"]
+    if target["ability"] in abilities.ability_category_set[7]:
+        curr_ability_function = getattr(abilities, ability_function)
+        curr_ability_function(user, move, target, damage)
 
 
 def unusual_damage_stat_to_use_check(user, move, phy_a, spec_a, phy_d, spec_d):
@@ -314,8 +330,19 @@ def calculate_interaction(move, user, target):
         type_multiplier *= float(types_dict[type_to_use][t])
     damage *= type_multiplier
 
-    # Ability Check Category 3: Defense abilities and Counter abilities
+    # Ability Check Category 3: Defense abilities
     damage = ability_check_category_3(user, move, target, damage)
+
+    if move in healing_attack_set:
+        try:
+            heal_function = specific_moves.moves_dict[move]["heal_effect_function"]
+            heal_function = getattr(specific_moves, heal_function)
+            heal_function(user, target, damage)
+        except KeyError:
+            print("Heal function not found for healing attack.")
+
+    # Ability Check Category 7: Counter abilities
+    ability_check_category_7(user, move, target, damage)
 
     # Damage Subtraction
     target["curr_hp"] -= int(damage)
@@ -325,14 +352,6 @@ def calculate_interaction(move, user, target):
     if type_to_use == "fire" and target["status"] == "freeze":
         target["status"] = "none"
         print(target["name"] + " thawed out!")
-
-    if move in healing_attack_set:
-        try:
-            heal_function = specific_moves.moves_dict[move]["heal_effect_function"]
-            heal_function = getattr(specific_moves, heal_function)
-            heal_function(user, target, damage)
-        except KeyError:
-            print("Heal function not found for healing attack.")
 
     match type_multiplier:
         case 2.0 | 4.0:
