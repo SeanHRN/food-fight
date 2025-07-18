@@ -143,7 +143,7 @@ Moves
 
 - Check the soup burst case where Soup Dumpling's HP is reduced by poison/burn instead of being hit. 
 
-- Upcoming characters: Raghoul, Forest Lizard
+- Upcoming characters: Raghoul (almost done), Forest Lizard
 
 
 
@@ -158,3 +158,11 @@ Run battle.py in your terminal from this directory.
 or
 
 `py battle.py`
+
+
+## Latest Fixes ##
+
+- Fixed crash when Moxie tries to activate after a U-turn that KOed the opponent and the Moxie user switches in.
+- Fixed infinite loop from a tie.
+- "Counter" abilities (Soup Burst and eventually Rough Skin) now activate after the healing portion of a healing attack.
+- Corrected U-turn behaviour in turn system, so a U-turning opponent would be hit by Soup Burst before returning.
