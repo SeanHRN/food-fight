@@ -28,11 +28,11 @@ def check_multi_hit_variable_type_1(user):
         print(user["name"] + "'s attack is boosted by Skill Link!")
         return 5
     random_number = random.random()
-    if random_number <= .125:
+    if random_number < .125:
         return 5
-    if random_number <= .25:
+    if random_number < .25:
         return 4
-    if random_number <= .375:
+    if random_number < .375:
         return 3
     return 2
 
@@ -285,7 +285,6 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
         # Recall/Suspend System Continuation
         if suspend_code in [1, 2]:
-            print("RESUMED")
             if suspend_code == 1:
                 do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
             elif suspend_code == 2:

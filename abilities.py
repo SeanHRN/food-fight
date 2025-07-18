@@ -106,7 +106,7 @@ def check_technician(user, move):
     return 0
 
 def check_moxie(user, move, target):
-    if specific_moves.moves_dict[move]["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
+    if move != "blank" and specific_moves.moves_dict[move]["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
         specific_moves.change_stats(user, ["phy_att"], [1])
 
 def check_punk_rock(user, move):

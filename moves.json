@@ -29,7 +29,21 @@
         "attr_bypass_protect" : false
     },
     {
-        "name"     : "blank attack",
+        "name"     : "blank",
+        "type"     : "normal",
+        "category" : "blank",
+        "pp"       : 0,
+        "power"    : 0,
+        "accuracy" : 0,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "none",
+        "attr_makes_contact" : false,
+        "description" : "This attack does nothing!",
+        "attr_bypass_protect" : false
+    },
+    {
+        "name"     : "debug blank attack",
         "type"     : "normal",
         "category" : "physical",
         "pp"       : 20,
