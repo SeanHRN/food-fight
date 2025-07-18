@@ -152,6 +152,8 @@ def do_battle(fighter_a, fighter_b, suspend_code):
     # Check the conditions of the completion of the battle to break ties.
 
     # EXPERIMENTAL: Abilities on summon
+    #print("a entry ability: " + str(fighter_a["used_entry_ability"]))
+    #print("b entry ability: " + str(fighter_b["used_entry_ability"]))
     moves.ability_check_category_6(fighter_a, fighter_b)
     moves.ability_check_category_6(fighter_b, fighter_a)
 
@@ -238,13 +240,13 @@ def do_battle(fighter_a, fighter_b, suspend_code):
 
             # Recall / Suspend System v2
             if fighter_a["queued_move"] == "recall" and fighter_b["queued_move"] != "recall":
-                print("returning with recall for 1")
+                #print("returning with recall for 1")
                 return "recall", 1, [int(recall_next_f[0]), 10], True # not actually using these True statements for this context; it's more for u-turn currently.
             if fighter_b["queued_move"] == "recall" and fighter_a["queued_move"] != "recall":
-                print("returning with recall for 2")
+                #print("returning with recall for 2")
                 return "recall", 2, [10, int(recall_next_f[1])], True
             if fighter_a["queued_move"] == "recall" and fighter_b["queued_move"] == "recall":
-                print("Both recalled!")
+                #print("Both recalled!")
                 return "recall", 3, [int(recall_next_f[0]), int(recall_next_f[1])], True
 
             print("- - - - - - - - -")
@@ -258,45 +260,39 @@ def do_battle(fighter_a, fighter_b, suspend_code):
                 battle_over, special_code[0] = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
                 #print("special code -> A moved first: " + str(special_code))
                 if special_code[0] in range(len(fighter_a["team"])):
-                    u_turn_a = True
+                    #u_turn_a = True
+                    return "u-turn", 1, special_code, False
                 if not battle_over:
                     battle_over, special_code[1] = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
-                #    print("special code -> B moved second: " + str(special_code[1]))
+                    #print("special code -> B moved second: " + str(special_code[1]))
                     if special_code[1] in range(len(fighter_b["team"])):
-                        u_turn_b = True
+                        #u_turn_b = True
+                        return "u-turn", 2, special_code, False
+
             else:
                 #print("B first")
                 battle_over, special_code[1] = do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
                 #print("special code -> B moved first: " + str(special_code[1]))
                 if special_code[1] in range(len(fighter_b["team"])):
-                    u_turn_b = True
+                    #u_turn_b = True
+                    return "u-turn", 2, special_code, False
                 if not battle_over:
                     battle_over, special_code[0] = do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
-                #    print("special code -> A moved second: " + str(special_code[0]))
+                    #print("special code -> A moved second: " + str(special_code[0]))
                     if special_code[0] in range(len(fighter_a["team"])):
-                        u_turn_a = True
-
-            if u_turn_a and u_turn_b:
-                #print("u-turn: both")
-                return "u-turn", 3, special_code, False
-            if u_turn_a:
-                #print("u-turn A")
-                return "u-turn", 1, special_code, False
-            if u_turn_b:
-                #print("u-turn B")
-                return "u-turn", 2, special_code, False
-
-            # TODO: Make sure that rough skin/soup burst hits the u-turning opponent. Currently, soup burst does not.
+                        #u_turn_a = True
+                        return "u-turn", 1, special_code, False
 
         # Recall/Suspend System Continuation
         if suspend_code in [1, 2]:
+            print("RESUMED")
             if suspend_code == 1:
                 do_turn(fighter_b, fighter_b["queued_move"], fighter_a)
             elif suspend_code == 2:
                 do_turn(fighter_a, fighter_a["queued_move"], fighter_b)
 
             #suspend_code = 0
-            print("Doing normal return completion.")
+            #print("Doing normal return completion.")
             return "completion after suspend", 0, [0]
 
         if (fighter_a["curr_hp"] > 0 and fighter_b["curr_hp"] > 0):
@@ -377,6 +373,24 @@ def reset_stat_changes(fr):
     ]:
         fr[s] = 0
 
+def reset_changes_for_recall(fr):
+    #print("jojo called")
+    reset_stat_changes(fr)
+    for s in [
+        "used_entry_ability",
+        "substituted",
+        "infatuated",
+        "confused",
+        "state_protect"
+    ]:
+        fr[s] = False
+    fr["count_protect"] = 0
+    for s in [
+        fr["queued_move"],
+        fr["previous_move"]
+    ]:
+        fr[s] = "blank"
+
 def debug_print(fighter_a, fighter_b):
     print("\n-- Fighters' Stats: --\n")
     for f in [fighter_a, fighter_b]:
@@ -442,6 +456,7 @@ if os.path.isfile("fighters.json"):
             fighter_temp["spec_def"] = 0
             fighter_temp["speed"] = 0
             fighter_temp["koed"] = False
+            fighter_temp["used_entry_ability"] = False
             determine_stats(fighter_temp)
             # Start the moves with the pp from the moves dict.
             # If the move is undefined, give it 10 pp.
@@ -465,15 +480,15 @@ if os.path.isfile("fighters.json"):
 
 if BATTLE_CAN_HAPPEN:
 
-    team_a = [roster[1].copy(), roster[2].copy(), roster[4].copy()]
-    #team_a = [roster[4].copy()]
+    team_a = [roster[1].copy(), roster[2].copy(), roster[3].copy()]
+    #team_a = [roster[1].copy(), roster[2].copy()]
 
     for slot,f in enumerate(team_a):
         f["team_slot"] = slot
         f["team"] = team_a
 
-    team_b = [roster[3].copy(), roster[5].copy(), roster[6].copy()]
-    #team_b = [roster[7].copy()]
+    team_b = [roster[4].copy(), roster[5].copy(), roster[6].copy()]
+    #team_b = [roster[4].copy()]
 
     for slot,f in enumerate(team_b):
         f["team_slot"] = slot
@@ -518,35 +533,36 @@ if BATTLE_CAN_HAPPEN:
               team_a[next_fighter["team_a"]]["name"] + " vs " + team_b[next_fighter["team_b"]]["name"] + " >>>")
         check_print_hp(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]])
         battle_output = do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
-        #print("checking battle_output[0]: " + battle_output[0])
-        #print("battle output: ")
-        #for p in battle_output:
-        #    print(p, end= "   ")
 
 
         if battle_output[0] == "recall" or battle_output[0] == "u-turn":
             if battle_output[1] == 1:
-                reset_stat_changes(team_a[next_fighter["team_a"]])
+                reset_changes_for_recall(team_a[next_fighter["team_a"]])
                 next_fighter["team_a"] = battle_output[2][0]
                 print("Team A sent out " + team_a[int(battle_output[2][0])]["name"] + "!")
-                if battle_output[0] != "u-turn":
-                    do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+                do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
             elif battle_output[1] == 2:
-                reset_stat_changes(team_b[next_fighter["team_b"]])
+                reset_changes_for_recall(team_b[next_fighter["team_b"]])
                 next_fighter["team_b"] = battle_output[2][1]
                 print("Team B sent out " + team_b[int(battle_output[2][1])]["name"] + "!")
-                if battle_output[0] != "u-turn":
-                    do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
+                do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], battle_output[1])
             elif battle_output[1] == 3:
                 print("Both u-turned!!!")
-                reset_stat_changes(team_a[next_fighter["team_a"]])
-                reset_stat_changes(team_a[next_fighter["team_b"]])
+                reset_changes_for_recall(team_a[next_fighter["team_a"]])
+                reset_changes_for_recall(team_a[next_fighter["team_b"]])
                 next_fighter["team_a"] = battle_output[2][0]
                 next_fighter["team_b"] = battle_output[2][1]
                 print("Team A sent out " + team_a[int(battle_output[2][0])]["name"] + "!")
                 print("Team B sent out " + team_b[int(battle_output[2][1])]["name"] + "!")
                 do_battle(team_a[next_fighter["team_a"]], team_b[next_fighter["team_b"]], 0)
 
+        if battle_output[0] == "fighter_both_defeated": #experimental
+            if "sd_counter_win" in team_a[next_fighter["team_a"]] and team_a[next_fighter["team_a"]]["sd_counter_win"]:
+                print("Player 1 wins!")
+            else:
+                print("Player 2 wins!")
+            defeated_a = True
+            defeated_b = True
 
         if all(f["koed"] for f in team_a):
             print("Player 2 wins!")

@@ -46,7 +46,7 @@ def check_print_hp(fighterA, fighterB):
     print(fighterB["name"] + " HP: " + str(fighterB["curr_hp"]))
 
 def check_soup_burst(attacker, move, target, damage):
-    if target["curr_hp"] <= (target["hp"]/2) and target["state_ability_activated"] is False:
+    if target["curr_hp"]-damage <= (target["hp"]/2) and target["state_ability_activated"] is False:
         target["state_ability_activated"] = True
         print(target["name"] + " bursted scalding soup!")
         specific_moves.change_stats(target, ["phy_att","phy_def","spec_att","spec_def","speed"], \
@@ -54,7 +54,6 @@ def check_soup_burst(attacker, move, target, damage):
         if specific_moves.moves_dict[move]["attr_makes_contact"] is True:
             print(attacker["name"] + " is splashed with soup!")
             moves.calculate_interaction("scald", target, attacker)
-            check_print_hp(attacker, target)
         else:
             print(attacker["name"] + " avoided the soup!")
         if attacker["curr_hp"] <= 0 and target["curr_hp"] <= 0:
@@ -103,8 +102,8 @@ def check_galvanize(user, move):
 def check_technician(user, move):
     if specific_moves.moves_dict[move]["power"] <= 60:
         print(user["name"] + "'s " + move.title() + " is boosted by Technician!")
-        return 1.5
-    return 1
+        return .5
+    return 0
 
 def check_moxie(user, move, target):
     if specific_moves.moves_dict[move]["category"] != "status": # If the move was an attack #TODO: Make sure a move that missed won't allow this to go through.
@@ -137,3 +136,9 @@ def check_sturdy(user, move, target, damage):
 def check_intimidate(user, target):
     print(user["name"] + "'s Intimidate!")
     specific_moves.change_stats(target,["phy_att"], [-1])
+
+def check_bulletproof(user, move, target, damage):
+    if "attr_ball_and_bomb" in specific_moves.moves_dict[move] and specific_moves.moves_dict[move]["attr_ball_and_bomb"] is True:
+        print(target["name"] + " is protected by Bulletproof!")
+        return 0
+    return damage

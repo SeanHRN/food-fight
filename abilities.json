@@ -45,6 +45,12 @@
         "description" : "User can't be KOed in one hit."
     },
     {
+        "name" : "bulletproof",
+        "category" : 3,
+        "effect_function" : "check_bulletproof",
+        "description" : "User is immune to ball/bomb moves."
+    },
+    {
         "name" : "intimidate",
         "category" : 6,
         "effect_function" : "check_intimidate",

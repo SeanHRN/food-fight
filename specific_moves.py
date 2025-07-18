@@ -6,6 +6,8 @@ import csv
 import itertools
 import json
 
+major_status_set = {"burn", "sleep", "paralyze", "poison", "freeze"}
+minor_status_set = {"confuse", "infatuate"}
 
 moves_dict = {}
 
@@ -60,8 +62,14 @@ def check_accuracy(move_accuracy):
     print("It missed!")
     return False
 
+def print_stat_level_change(target, stats, differences):
+    for s, d in zip(stats, differences):
+        if d > 0:
+            print(target["name"] + "'s " + s + " increased by " + str(d) + " stage(s)")
+        elif d < 0:
+            print(target["name"] + "'s " + s + " decreased by " + str(d) + " stage(s)")
 
-def print_stat_level_change(target, stats, levels): # levels before the change, not after
+def print_stat_level_change_old(target, stats, levels): # levels before the change, not after
     # Use this only for the print statements. Do not make changes to the stats here.
 
     for s,l in zip(stats, levels):
@@ -89,18 +97,21 @@ def change_stats(target, stats, levels):
     Use this to validate the math for a stat change.
     '''
     capped_levels = []
+    differences = []
     for s, l in zip(stats, levels):
         current_stage = target["curr_stage_" + s]
         proposed_change = current_stage + l
         final_change = proposed_change
+        difference = final_change - current_stage
         if proposed_change <= -6:
             final_change = -6
         elif proposed_change >= 6:
             final_change = 6
         capped_levels.append(final_change)
-    
-    print_stat_level_change(target, stats, capped_levels)
+        differences.append(difference)
 
+    #print_stat_level_change(target, stats, capped_levels)
+    print_stat_level_change(target, stats, differences)
 
 def self_thaw(user):
     if user["status"] == "freeze":
@@ -116,7 +127,7 @@ def print_status_effect(target, status, already):
     else:
         print(target["name"] + " is already " + status + "ed!")
 
-def print_ability_protect(user):
+def print_ability_protect(user, target):
     print(user["name"] + " is protected by " + user["ability"].title() + "!")
 
 def change_volatile_status_effect(target, status):
@@ -190,6 +201,13 @@ def move_heat_crash(user, target):
                 return [2,120,0]
     return [1,0,0]
 
+def move_hex(user, target):
+    if check_accuracy(moves_dict["hex"]["accuracy"]):
+        if target["status"] in major_status_set:
+            return [2, 2, 1]
+        return [2,0,0]
+    return [1,0,0]
+
 def move_ice_punch(user, target):
     if check_accuracy(moves_dict["ice punch"]["accuracy"]):
         if random.random() < 0.1:
@@ -210,13 +228,19 @@ def move_scald(user, target):
             target["status"] = "burn"
             print(target["name"] + " is burned!")
         return [2,0,0]
-    else:
-        return [1,0,0]
+    return [1,0,0]
 
 def move_sludge_bomb(user, target):
     if check_accuracy(moves_dict["sludge bomb"]["accuracy"]):
         if random.random() < 0.3:
             change_volatile_status_effect(target, "poison")
+        return [2,0,0]
+    return [1,0,0]
+
+def move_shadow_ball(user, target):
+    if check_accuracy(moves_dict["shadow ball"]["accuracy"]):
+        if random.random() < 0.2:
+            change_stats(target, ["spec_def"], [-1])
         return [2,0,0]
     return [1,0,0]
 
@@ -280,16 +304,17 @@ def move_autotomize(user, target):
         user["weight"] = 0.1
 
 def move_belly_drum(user, target):
-    print_stat_level_change(user, ["phy_att"], [6])
+    #print_stat_level_change(user, ["phy_att"], [6])
     print(user["name"] + "'s HP went down!")
     user["curr_hp"] *= 0.5
     user["curr_hp"] = int(user["curr_hp"])
     user["curr_stage_phy_att"] = 6
+    print(user["name"] + "'s Physical Attack maxed out!")
 
 def move_dragon_dance(user, target):
     change_stats(user, ["phy_att", "speed"], [1, 1])
 
-def move_protect(user):
+def move_protect(user, target):
     '''
     The count is refreshed during the battle loop as needed.
     '''

@@ -142,6 +142,20 @@
         "attr_bypass_protect" : false
     },
     {
+        "name"     : "hex",
+        "type"     : "ghost",
+        "category" : "special",
+        "pp"       : 16,
+        "power"    : 65,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_hex",
+        "attr_makes_contact" : false,
+        "description" : "Deals double damage if the trarget has a status ailment.",
+        "attr_bypass_protect" : false
+    },
+    {
         "name"     : "protect",
         "type"     : "normal",
         "category" : "status",
@@ -181,6 +195,20 @@
         "effect_function" : "move_scald",
         "attr_makes_contact" : false,
         "description" : "The user attacks by shooting boiling hot water at the target. This may also leave the target with a burn.",
+        "attr_bypass_protect" : false
+    },
+    {
+        "name" : "shadow ball",
+        "type" : "ghost",
+        "category" : "special",
+        "pp" : 24,
+        "power" : 80,
+        "accuracy" : 100,
+        "priority" : 0,
+        "instances" : 1,
+        "effect_function" : "move_shadow_ball",
+        "attr_makes_contact" : false,
+        "description" : "The user attacks by hurling a shadowy blob at the target. This may also lower the target’s Sp. Def stat.",
         "attr_bypass_protect" : false
     },
     {
